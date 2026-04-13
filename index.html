@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora d'Estalvi Energètic | ITB</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>🌍 Calculadora d'Estalvi Energètic</h1>
+            <p class="subtitle">Institut Tecnològic de Barcelona - TA08 Sostenibilitat</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- SECCIÓ 1: INTRODUCCIÓ -->
+        <section class="intro-section">
+            <h2>🎯 Repte: Reduir un 30% l'impacte ambiental TIC en 3 anys</h2>
+            <p>Aquesta calculadora analitza els consums actuals de l'ITB i projecta escenaris de millora basats en accions concretes de sostenibilitat.</p>
+            <div class="period-selector">
+                <label>Període d'anàlisi:</label>
+                <select id="periodSelector">
+                    <option value="annual">Anual (12 mesos)</option>
+                    <option value="academic">Acadèmic (setembre-juny, 10 mesos)</option>
+                    <option value="custom">Personalitzat</option>
+                </select>
+                <input type="number" id="customMonths" min="1" max="12" value="12" style="display:none; margin-left: 10px;" placeholder="Mesos">
+            </div>
+        </section>
+
+        <!-- SECCIÓ 2: INDICADORS DE CONSUM ACTUAL -->
+        <section class="indicators-section">
+            <h2>📊 Indicadors de Consum Actual (2024-2025)</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <label>Consumo d'Aigua Diari</label>
+                    <div class="value">4,735 <span class="unit">litres</span></div>
+                    <small>~1.160 m³/any</small>
+                </div>
+                <div class="metric-card">
+                    <label>Consum Elèctric Diari</label>
+                    <div class="value">327 <span class="unit">kWh</span></div>
+                    <small>~117.857 kWh/any</small>
+                </div>
+                <div class="metric-card">
+                    <label>Producció Solar (any)</label>
+                    <div class="value">11,120 <span class="unit">kWh</span></div>
+                    <small>~9,4% del consum</small>
+                </div>
+                <div class="metric-card">
+                    <label>Cost Anual Estimat</label>
+                    <div class="value">27,842 <span class="unit">€</span></div>
+                    <small>Energía, aigua i consumibles</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓ 3: CALCULADORA -->
+        <section class="calculator-section">
+            <h2>⚙️ Calculadora de Scenarios</h2>
+            
+            <div class="calculator-grid">
+                <!-- COLUMNA 1: CONSUM ELÈCTRIC -->
+                <div class="calc-block">
+                    <h3>⚡ Consum Elèctric</h3>
+                    
+                    <div class="form-group">
+                        <label>Reduccio per millores (%):</label>
+                        <input type="range" id="electricReduction" min="0" max="40" value="0" step="5">
+                        <span class="range-value" id="electricReductionValue">0%</span>
+                    </div>
+
+                    <div class="results-box">
+                        <h4>8 Càlculs de Consum Elèctric:</h4>
+                        <ul>
+                            <li>
+                                <strong>1. Consum any natural:</strong>
+                                <span id="calc1" class="result-value">117.857 kWh</span>
+                                <small id="calc1Cost" class="cost">€20.163</small>
+                            </li>
+                            <li>
+                                <strong>2. Consum periode acadèmic:</strong>
+                                <span id="calc2" class="result-value">98.214 kWh</span>
+                                <small id="calc2Cost" class="cost">€16.802</small>
+                            </li>
+                            <li>
+                                <strong>3. Consum amb estacionalitat (hivern):</strong>
+                                <span id="calc3" class="result-value">145.213 kWh</span>
+                                <small id="calc3Cost" class="cost">€24.847</small>
+                            </li>
+                            <li>
+                                <strong>4. Consum amb estacionalitat (estiu):</strong>
+                                <span id="calc4" class="result-value">98.447 kWh</span>
+                                <small id="calc4Cost" class="cost">€16.837</small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="improvement-box">
+                        <h4>🔋 Millora Proposada (30%):</h4>
+                        <ul>
+                            <li>✓ Apagar GPOs a les 22:00 (-8% consum nocturn)</li>
+                            <li>✓ Actualizar servidors (eficiència 20%)</li>
+                            <li>✓ Ampliar energia solar a 50 kWp (+25% autoconsum)</li>
+                            <li><strong>Estalvi anual: 35.357 kWh (30%)</strong></li>
+                            <li><strong>Cost estalviat: €6.049/any</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- COLUMNA 2: CONSUM D'AIGUA -->
+                <div class="calc-block">
+                    <h3>💧 Consum d'Aigua</h3>
+                    
+                    <div class="form-group">
+                        <label>Reduccio per millores (%):</label>
+                        <input type="range" id="waterReduction" min="0" max="40" value="0" step="5">
+                        <span class="range-value" id="waterReductionValue">0%</span>
+                    </div>
+
+                    <div class="results-box">
+                        <h4>8 Càlculs de Consum d'Aigua:</h4>
+                        <ul>
+                            <li>
+                                <strong>5. Consum any natural:</strong>
+                                <span id="calc5" class="result-value">1.160 m³</span>
+                                <small id="calc5Cost" class="cost">€2.088</small>
+                            </li>
+                            <li>
+                                <strong>6. Consum periode acadèmic:</strong>
+                                <span id="calc6" class="result-value">967 m³</span>
+                                <small id="calc6Cost" class="cost">€1.740</small>
+                            </li>
+                            <li>
+                                <strong>7. Consum amb pics de neteja:</strong>
+                                <span id="calc7" class="result-value">1.405 m³</span>
+                                <small id="calc7Cost" class="cost">€2.529</small>
+                            </li>
+                            <li>
+                                <strong>8. Consm amb fuga detectada (referència):</strong>
+                                <span id="calc8" class="result-value">1.932 m³</span>
+                                <small id="calc8Cost" class="cost">€3.478</small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="improvement-box">
+                        <h4>💧 Millora Proposada (30%):</h4>
+                        <ul>
+                            <li>✓ Reparar fuites sistemes (detectades a nit)</li>
+                            <li>✓ Instal·lar assecadors mans elèctrics (-60% paper higiènic)</li>
+                            <li>✓ Sistemes de detecció fuites en temps real</li>
+                            <li><strong>Estalvi anual: 348 m³ (30%)</strong></li>
+                            <li><strong>Cost estalviat: €626/any</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- COLUMNA 3: CONSUMIBLES I RESIDUS -->
+                <div class="calc-block">
+                    <h3>📦 Consumibles & Residus</h3>
+                    
+                    <div class="form-group">
+                        <label>Reduccio per economia circular (%):</label>
+                        <input type="range" id="consumablesReduction" min="0" max="50" value="0" step="5">
+                        <span class="range-value" id="consumablesReductionValue">0%</span>
+                    </div>
+
+                    <div class="results-box">
+                        <h4>Costos Anuals Actuals:</h4>
+                        <ul>
+                            <li><strong>Paper d'oficina:</strong> €481/any (7.500 fulls)</li>
+                            <li><strong>Retoladors:</strong> €150/any</li>
+                            <li><strong>Productes neteja:</strong> €4.820/any (70% paper higiènic)</li>
+                            <li><strong>Manteniment:</strong> €7.819/any</li>
+                            <li><strong>Total consumibles:</strong> €13.270/any</li>
+                        </ul>
+                    </div>
+
+                    <div class="improvement-box">
+                        <h4>♻️ Millora Proposada (30%):</h4>
+                        <ul>
+                            <li>✓ Digitalització de documents (-40% paper)</li>
+                            <li>✓ Assecadors elèctrics vs. paper higiènic (-60%)</li>
+                            <li>✓ Economia circular: reparar vs. substituir</li>
+                            <li>✓ Manteniment preventiu (-30%)</li>
+                            <li><strong>Estalvi anual: €3.981 (30%)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓ DE CALCULAR SCENARIO -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn-calculate" onclick="calculateScenario()">📈 Calcular Scenario de Reducció 30% (3 anys)</button>
+            </div>
+        </section>
+
+        <!-- SECCIÓ 4: GRÀFICS DE RESULTATS -->
+        <section class="charts-section" id="chartsSection" style="display:none;">
+            <h2>📉 Comparativa: Situació Actual vs. Mejora 30%</h2>
+            
+            <div class="charts-grid">
+                <div class="chart-wrapper">
+                    <h3>Consum Elèctric - Reducció 3 anys</h3>
+                    <canvas id="electricChart" role="img" aria-label="Proyección del consum elèctric anys 1-3"></canvas>
+                </div>
+
+                <div class="chart-wrapper">
+                    <h3>Consum d'Aigua - Reducció 3 anys</h3>
+                    <canvas id="waterChart" role="img" aria-label="Proyección del consum d'aigua anys 1-3"></canvas>
+                </div>
+
+                <div class="chart-wrapper">
+                    <h3>Cost Total Anual - Estalvi Acumulat</h3>
+                    <canvas id="costChart" role="img" aria-label="Costos actuals vs estalvi en 3 anys"></canvas>
+                </div>
+
+                <div class="chart-wrapper">
+                    <h3>Emissions de CO₂ Evitades (tones/any)</h3>
+                    <canvas id="co2Chart" role="img" aria-label="Reduccio d'emissions CO2 en 3 anys"></canvas>
+                </div>
+            </div>
+
+            <!-- RESUM EXECUTIU -->
+            <section class="summary-section">
+                <h2>📋 Resum Executiu: Pla de Sostenibilitat 3 anys</h2>
+                
+                <div class="timeline">
+                    <div class="year-block">
+                        <h3>Any 1 (2025)</h3>
+                        <ul>
+                            <li>🔧 Reparació fuites sistemes d'aigua</li>
+                            <li>💡 Instal·lació assecadors mans elèctrics</li>
+                            <li>🔌 Programació apagat automàtic GPOs</li>
+                            <li><strong>Reducció estimada: 10%</strong></li>
+                            <li><strong>Estalvi: €2.769</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="year-block">
+                        <h3>Any 2 (2026)</h3>
+                        <ul>
+                            <li>📱 Digitalització 30% documents</li>
+                            <li>⚡ Upgrade servidors eficiència energètica</li>
+                            <li>🔍 Sistema detecció fuites IoT</li>
+                            <li><strong>Reducció estimada: 20%</strong></li>
+                            <li><strong>Estalvi: €5.568</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="year-block">
+                        <h3>Any 3 (2027)</h3>
+                        <ul>
+                            <li>☀️ Ampliació energia solar 50 kWp</li>
+                            <li>♻️ Protocol economia circular reparacions</li>
+                            <li>📊 Certificació ISO 14001</li>
+                            <li><strong>Reducció estimada: 30%</strong></li>
+                            <li><strong>Estalvi: €8.367</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="final-summary">
+                    <h3>🎯 Objectiu Assolit</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <strong>Estalvi elèctric:</strong>
+                            <span id="summaryElectric">35.357 kWh</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Estalvi hídric:</strong>
+                            <span id="summaryWater">348 m³</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Estalvi econòmic:</strong>
+                            <span id="summaryCost">€8.367</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>CO₂ evitat:</strong>
+                            <span id="summaryCO2">6,4 tones</span>
+                        </div>
+                    </div>
+                    <p class="final-note">
+                        ✓ <strong>Conclusió:</strong> Es possible reduir un 30% l'impacte ambiental TIC del centre en 3 anys amb accions concretes, mesurables i economicament viables. L'economia circular i la prevenció són més efectives que la gestió de residus.
+                    </p>
+                </div>
+            </section>
+        </section>
+
+        <!-- SECCIÓ 5: GUIA DE REDUCCIONS -->
+        <section class="improvements-section">
+            <h2>🛠️ Com Reduir el Consum de Cada Indicador</h2>
+            
+            <div class="improvements-grid">
+                <div class="improvement-card">
+                    <h3>⚡ Reducció Consum Elèctric</h3>
+                    <ul>
+                        <li>📌 <strong>Apagat automàtic GPOs:</strong> Instal·lar programadors per apagar tots els equips a les 22:00. Reducció: -8% (9.428 kWh/any)</li>
+                        <li>💾 <strong>Servidors més eficients:</strong> Virtualització i consolidació. Reducció: -12% (14.143 kWh/any)</li>
+                        <li>☀️ <strong>Ampliar solar:</strong> Passar de 30 a 50 kWp. Reducció: -10% (11.786 kWh/any)</li>
+                        <li>❄️ <strong>Climatització intel·ligent:</strong> Termostats que s'adapten a ocupació. Reducció: -5%</li>
+                        <li><strong>Total potencial: -30% = 35.357 kWh/any = €6.049/any</strong></li>
+                    </ul>
+                </div>
+
+                <div class="improvement-card">
+                    <h3>💧 Reducció Consum d'Aigua</h3>
+                    <ul>
+                        <li>🔧 <strong>Reparació fuites:</strong> Les fuites nocturnes suposen 8.092 L/dia. Reducció: -15% (174 m³/any)</li>
+                        <li>🚿 <strong>Airejadors sensoritzats:</strong> A lavabos. Reducció: -8% (93 m³/any)</li>
+                        <li>✋ <strong>Assecadors elèctrics:</strong> Substituir paper higiènic. Reducció: -10% (116 m³/any)</li>
+                        <li>💧 <strong>Sistema reutilització:</strong> Aigua de pluja per jardins. Reducció: -5%</li>
+                        <li><strong>Total potencial: -30% = 348 m³/any = €626/any</strong></li>
+                    </ul>
+                </div>
+
+                <div class="improvement-card">
+                    <h3>📦 Reducció Consumibles & Residus</h3>
+                    <ul>
+                        <li>📱 <strong>Digitalització:</strong> Reducció paper 40%. Estalvi: €192/any + -200 kg CO₂</li>
+                        <li>✋ <strong>Assecadors vs. paper:</strong> 60% menys paper higiènic. Estalvi: €2.025/any</li>
+                        <li>♻️ <strong>Economia circular:</strong> Reparar vs substituir equips. Estalvi: €1.200/any</li>
+                        <li>🔍 <strong>Detecció fuites IoT:</strong> Monitoratge temps real. Estalvi: €500/any</li>
+                        <li><strong>Total potencial: -30% = €3.917/any</strong></li>
+                    </ul>
+                </div>
+
+                <div class="improvement-card">
+                    <h3>🌍 Indicadors de Sostenibilitat (ODS)</h3>
+                    <ul>
+                        <li>🎯 <strong>ODS 7:</strong> Energia asequible i no contaminant</li>
+                        <li>🌱 <strong>ODS 12:</strong> Consum responsable i producció</li>
+                        <li>🌊 <strong>ODS 6:</strong> Aigua neta i saneamiento</li>
+                        <li>🏭 <strong>ODS 9:</strong> Industria, innovació i infraestructura</li>
+                        <li>🌡️ <strong>ODS 13:</strong> Acció per el clima</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓ 6: FOOTER -->
+        <footer class="footer">
+            <p>Projecte TA08 - Calculadora d'Estalvi Energètic | CFGS ASIX | 2025 | <a href="#" onclick="exportData()">📥 Descarregar dades</a></p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
