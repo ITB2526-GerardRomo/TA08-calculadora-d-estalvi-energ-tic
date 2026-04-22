@@ -1,898 +1,205 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora d'Estalvi Energètic | ITB - TA08</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --primary: #0f766e;
-  --secondary: #0d9488;
-  --accent: #f59e0b;
-  --success: #10b981;
-  --bg-light: #ecfdf5;
-  --text: #1f2937;
-  --text-muted: #6b7280;
-  --border: #e5e7eb;
-  --bg-page: #f9fafb;
-}
-
-html, body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text);
-  background: var(--bg-page);
-  line-height: 1.6;
-}
-
-.container { max-width: 1300px; margin: 0 auto; padding: 0 20px; }
-
-/* HEADER */
-.header {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  padding: 50px 20px;
-  text-align: center;
-  margin-bottom: 40px;
-}
-.header h1 { font-size: 2.2rem; margin-bottom: 8px; }
-.header p { opacity: 0.9; font-size: 1rem; }
-
-/* SECCIONS */
-section {
-  background: white;
-  border-radius: 12px;
-  padding: 35px;
-  margin-bottom: 40px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-section h2 {
-  font-size: 1.6rem;
-  color: var(--primary);
-  border-bottom: 3px solid var(--accent);
-  padding-bottom: 12px;
-  margin-bottom: 8px;
-}
-section h3 { font-size: 1.15rem; color: var(--secondary); margin-bottom: 16px; }
-.section-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
-
-/* PARÀMETRES */
-.params-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-.param-group {
-  background: var(--bg-light);
-  padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid var(--secondary);
-}
-.param-item { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-.param-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-.param-item label { display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 8px; color: var(--text); }
-
-/* RANGE SLIDERS */
-input[type="range"] {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 6px;
-  border-radius: 3px; background: var(--border); outline: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--secondary); cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: all 0.2s;
-}
-input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); background: var(--primary); }
-input[type="range"]::-moz-range-thumb {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--secondary); cursor: pointer;
-  border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.range-row { display: flex; align-items: center; gap: 10px; }
-.range-row input[type="range"] { flex: 1; }
-.range-val {
-  min-width: 44px; text-align: right;
-  font-weight: 700; font-size: 0.9rem; color: var(--primary);
-}
-
-/* CUSTOM MONTHS */
-.custom-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
-.custom-row input[type="number"] {
-  flex: 1; padding: 8px 10px;
-  border: 1px solid var(--border); border-radius: 6px;
-  font-size: 0.95rem;
-}
-.custom-row span { color: var(--text-muted); font-size: 0.9rem; }
-
-/* CÁLCULS */
-.calculations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.calc-card {
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-.calc-card:hover {
-  border-color: var(--secondary);
-  box-shadow: 0 4px 14px rgba(13,148,136,0.12);
-}
-
-.calc-item {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 14px;
-  padding: 14px;
-  background: var(--bg-light);
-  border-radius: 8px;
-  border-left: 3px solid var(--secondary);
-}
-.calc-num {
-  font-size: 1.7rem;
-  font-weight: 700;
-  color: var(--secondary);
-  min-width: 32px;
-  line-height: 1;
-  margin-top: 2px;
-}
-.calc-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
-.calc-result { font-size: 1.35rem; font-weight: 700; color: var(--primary); }
-.calc-cost { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
-.calc-saving { font-size: 0.82rem; color: var(--success); margin-top: 2px; }
-
-/* TIPS */
-.tips-box {
-  background: rgba(16,185,129,0.08);
-  border-left: 3px solid var(--success);
-  padding: 12px 14px;
-  border-radius: 6px;
-  margin-top: 12px;
-}
-.tips-box strong { color: var(--primary); font-size: 0.85rem; display: block; margin-bottom: 6px; }
-.tips-box ul { list-style: none; }
-.tips-box li {
-  font-size: 0.82rem; color: var(--text);
-  padding: 2px 0 2px 14px; position: relative;
-}
-.tips-box li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 700; }
-
-/* RESUM */
-.summary-box {
-  background: linear-gradient(135deg, var(--bg-light), #dbeafe);
-  border: 2px solid var(--secondary);
-  border-radius: 10px;
-  padding: 24px;
-  margin-top: 24px;
-}
-.summary-box h3 { color: var(--primary); margin-bottom: 16px; }
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-}
-.summary-item {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid var(--accent);
-  text-align: center;
-}
-.summary-item span:first-child { display: block; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
-.summary-item span:last-child { display: block; font-size: 1.6rem; font-weight: 700; color: var(--primary); }
-
-/* GRÀFICS */
-.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-.chart-wrapper {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  position: relative;
-  height: 320px;
-}
-.chart-wrapper h3 { font-size: 0.95rem; text-align: center; margin-bottom: 10px; }
-.chart-wrapper canvas { height: calc(100% - 35px) !important; }
-
-/* GUIA */
-.improvements-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-.improvement-card {
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  padding: 18px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-.improvement-card:hover {
-  border-color: var(--secondary);
-  box-shadow: 0 4px 12px rgba(13,148,136,0.1);
-}
-.improvement-card h3 { font-size: 1rem; margin-bottom: 12px; color: var(--secondary); }
-.improvement-card ul { list-style: none; }
-.improvement-card li {
-  padding: 7px 0 7px 16px;
-  position: relative;
-  font-size: 0.88rem;
-  border-bottom: 1px solid var(--border);
-}
-.improvement-card li:last-child { border-bottom: none; }
-.improvement-card li::before { content: "→"; position: absolute; left: 0; color: var(--secondary); font-weight: 700; }
-
-/* FOOTER */
-footer {
-  background: var(--primary);
-  color: white;
-  text-align: center;
-  padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 40px;
-}
-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
-
-/* RESPONSIVE */
-@media (max-width: 700px) {
-  .header h1 { font-size: 1.5rem; }
-  section { padding: 20px; }
-  .params-grid, .calculations-grid, .improvements-grid, .charts-grid { grid-template-columns: 1fr; }
-  .summary-grid { grid-template-columns: 1fr 1fr; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ahorro Energético - ITB</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .controls-section {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .results-section {
+            background: #e6fffa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #b2f5ea;
+        }
+        .toggle-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .total-savings {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2f855a;
+            border-top: 2px solid #b2f5ea;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+        .info-text {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-left: 28px;
+        }
+    </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="container">
-    <h1>🌍 Calculadora d'Estalvi Energètic</h1>
-    <p>ITB · TA08 · Selecciona qualsevol paràmetre i els 8 cálculs s'actualitzen en temps real</p>
-  </div>
-</header>
-
-<main class="container">
-
-  <!-- ========== SECCIÓ 1: PARÀMETRES ========== -->
-  <section>
-    <h2>⚙️ Configura els paràmetres</h2>
-    <p class="section-desc">Modifica qualsevol valor. Els 8 cálculs s'actualitzen automàticament.</p>
-
-    <div class="params-grid">
-
-      <!-- PERÍODES -->
-      <div class="param-group">
-        <h3>📅 Períodes d'anàlisi</h3>
-
-        <div class="param-item">
-          <label>Any natural (12 mesos):</label>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Gener → Desembre</p>
+<div class="container">
+    <h1>Calculadora de Ahorro Energético</h1>
+    
+    <div class="controls-section">
+        <h2>Opciones de Sostenibilidad (Activar/Desactivar)</h2>
+        
+        <div class="toggle-group">
+            <label>
+                <input type="checkbox" id="toggle-solar" onchange="calcular()">
+                Producción Solar Fotovoltaica
+            </label>
+            <div class="info-text">Activa la producción estimada de 11.120 kWh anuales.</div>
         </div>
 
-        <div class="param-item">
-          <label>Període acadèmic (setembre–juny, 10 mesos):</label>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Curs escolar complet</p>
+        <div class="toggle-group">
+            <label>
+                <input type="checkbox" id="toggle-mantenimiento" onchange="calcular()">
+                Mantenimiento Preventivo Climatización
+            </label>
+            <div class="info-text">Reduce un 15% el consumo eléctrico general.</div>
         </div>
 
-        <div class="param-item">
-          <label>Période personalitzat:</label>
-          <div class="custom-row">
-            <input type="number" id="customMonths" min="1" max="12" value="6">
-            <span id="customLabel">6 mesos</span>
-          </div>
+        <div class="toggle-group">
+            <label>
+                <input type="checkbox" id="toggle-aigua" onchange="calcular()">
+                Campaña de Ahorro de Agua
+            </label>
+            <div class="info-text">Reduce un 10% el consumo total de agua.</div>
         </div>
-      </div>
-
-      <!-- ESTACIONALITAT -->
-      <div class="param-group">
-        <h3>🌡️ Cicles estacionals (ajustables)</h3>
-
-        <div class="param-item">
-          <label>Hivern (des–feb) — Electricitat:</label>
-          <div class="range-row">
-            <input type="range" id="winterElec" min="-50" max="50" value="25" step="1">
-            <span class="range-val" id="winterElecVal">+25%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Estiu (jun–ago) — Electricitat:</label>
-          <div class="range-row">
-            <input type="range" id="summerElec" min="-50" max="50" value="-20" step="1">
-            <span class="range-val" id="summerElecVal">-20%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Estiu — Consum d'água (piscina/riego):</label>
-          <div class="range-row">
-            <input type="range" id="summerWater" min="-50" max="50" value="15" step="1">
-            <span class="range-val" id="summerWaterVal">+15%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Activitat escolar — Consumibles i neteja:</label>
-          <div class="range-row">
-            <input type="range" id="schoolActivity" min="-50" max="50" value="20" step="1">
-            <span class="range-val" id="schoolActivityVal">+20%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- REDUCCIONS -->
-      <div class="param-group">
-        <h3>📉 Reducció per indicador</h3>
-
-        <div class="param-item">
-          <label>Reducció Electricitat (%):</label>
-          <div class="range-row">
-            <input type="range" id="elecRed" min="0" max="50" value="0" step="1">
-            <span class="range-val" id="elecRedVal">0%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Reducció Água (%):</label>
-          <div class="range-row">
-            <input type="range" id="waterRed" min="0" max="50" value="0" step="1">
-            <span class="range-val" id="waterRedVal">0%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Reducció Consumibles oficina (%):</label>
-          <div class="range-row">
-            <input type="range" id="consumerRed" min="0" max="50" value="0" step="1">
-            <span class="range-val" id="consumerRedVal">0%</span>
-          </div>
-        </div>
-
-        <div class="param-item">
-          <label>Reducció Productes neteja (%):</label>
-          <div class="range-row">
-            <input type="range" id="cleanRed" min="0" max="50" value="0" step="1">
-            <span class="range-val" id="cleanRedVal">0%</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ========== SECCIÓ 2: ELS 8 CÁLCULS ========== -->
-  <section>
-    <h2>📊 Els 8 cálculs específics</h2>
-    <p class="section-desc">Resultats actualitzats en temps real. Cada cálcul mostra el valor, cost i reducció aplicada.</p>
-
-    <div class="calculations-grid">
-
-      <!-- ELECTRICITAT -->
-      <div class="calc-card">
-        <h3>⚡ Consum Elèctric</h3>
-
-        <div class="calc-item">
-          <div class="calc-num">1</div>
-          <div>
-            <div class="calc-title">Any natural (12 mesos)</div>
-            <div class="calc-result" id="c1">117.857 kWh</div>
-            <div class="calc-cost" id="c1cost">€20.163</div>
-            <div class="calc-saving" id="c1saving">Reducció: 0 kWh estalviats</div>
-          </div>
-        </div>
-
-        <div class="calc-item">
-          <div class="calc-num">2</div>
-          <div>
-            <div class="calc-title">Període acadèmic (set–juny, 10 mesos)</div>
-            <div class="calc-result" id="c2">98.214 kWh</div>
-            <div class="calc-cost" id="c2cost">€16.802</div>
-            <div class="calc-saving" id="c2saving">Reducció: 0 kWh estalviats</div>
-          </div>
-        </div>
-
-        <div class="tips-box">
-          <strong>💡 Com reduir el consum elèctric:</strong>
-          <ul>
-            <li>Apagat automàtic GPOs a les 22:00 → −8%</li>
-            <li>Servidors virtualitzats i eficients → −12%</li>
-            <li>Ampliació solar 30→50 kWp → −10%</li>
-            <li>Climatització intel·ligent per ocupació → −5%</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- ÁGUA -->
-      <div class="calc-card">
-        <h3>💧 Consum d'Água</h3>
-
-        <div class="calc-item">
-          <div class="calc-num">3</div>
-          <div>
-            <div class="calc-title">Any natural (12 mesos)</div>
-            <div class="calc-result" id="c3">1.160 m³</div>
-            <div class="calc-cost" id="c3cost">€2.088</div>
-            <div class="calc-saving" id="c3saving">Reducció: 0 m³ estalviats</div>
-          </div>
-        </div>
-
-        <div class="calc-item">
-          <div class="calc-num">4</div>
-          <div>
-            <div class="calc-title">Període acadèmic (set–juny, 10 mesos)</div>
-            <div class="calc-result" id="c4">967 m³</div>
-            <div class="calc-cost" id="c4cost">€1.740</div>
-            <div class="calc-saving" id="c4saving">Reducció: 0 m³ estalviats</div>
-          </div>
-        </div>
-
-        <div class="tips-box">
-          <strong>💡 Com reduir el consum d'água:</strong>
-          <ul>
-            <li>Reparar fuites nocturnes detectades → −15%</li>
-            <li>Airejadors sensoritzats als lavabos → −8%</li>
-            <li>Assecadors elèctrics vs. paper higiènic → −10%</li>
-            <li>Reutilització d'água de pluja → −5%</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- CONSUMIBLES -->
-      <div class="calc-card">
-        <h3>📄 Consumibles d'Oficina</h3>
-
-        <div class="calc-item">
-          <div class="calc-num">5</div>
-          <div>
-            <div class="calc-title">Any natural (12 mesos)</div>
-            <div class="calc-result" id="c5">7.500 fulls</div>
-            <div class="calc-cost" id="c5cost">€631</div>
-            <div class="calc-saving" id="c5saving">Reducció: 0 fulls estalviats</div>
-          </div>
-        </div>
-
-        <div class="calc-item">
-          <div class="calc-num">6</div>
-          <div>
-            <div class="calc-title">Període acadèmic (set–juny, 10 mesos)</div>
-            <div class="calc-result" id="c6">6.250 fulls</div>
-            <div class="calc-cost" id="c6cost">€526</div>
-            <div class="calc-saving" id="c6saving">Reducció: 0 fulls estalviats</div>
-          </div>
-        </div>
-
-        <div class="tips-box">
-          <strong>💡 Com reduir consumibles:</strong>
-          <ul>
-            <li>Digitalització de documents → −40%</li>
-            <li>Impressió a doble cara obligatòria → −30%</li>
-            <li>Retoladors reutilitzables → −50%</li>
-            <li>Cartutxos regenerats → −20%</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- NETEJA -->
-      <div class="calc-card">
-        <h3>🧼 Productes de Neteja</h3>
-
-        <div class="calc-item">
-          <div class="calc-num">7</div>
-          <div>
-            <div class="calc-title">Any natural (12 mesos)</div>
-            <div class="calc-result" id="c7">€4.820</div>
-            <div class="calc-cost" id="c7cost">120 kg CO₂</div>
-            <div class="calc-saving" id="c7saving">Reducció: €0 estalviats</div>
-          </div>
-        </div>
-
-        <div class="calc-item">
-          <div class="calc-num">8</div>
-          <div>
-            <div class="calc-title">Període acadèmic (set–juny, 10 mesos)</div>
-            <div class="calc-result" id="c8">€4.017</div>
-            <div class="calc-cost" id="c8cost">100 kg CO₂</div>
-            <div class="calc-saving" id="c8saving">Reducció: €0 estalviats</div>
-          </div>
-        </div>
-
-        <div class="tips-box">
-          <strong>💡 Com reduir productes de neteja:</strong>
-          <ul>
-            <li>Assecadors elèctrics (−60% paper higiènic) → €2.025/any</li>
-            <li>Productes ecocertificats → −10% impacte</li>
-            <li>Màquina eficient (menys água i energia) → −15%</li>
-            <li>Neteja preventiva (menys urgències) → −25%</li>
-          </ul>
-        </div>
-      </div>
-
     </div>
 
-    <!-- RESUM TOTAL -->
-    <div class="summary-box">
-      <h3>📋 Resum total de costos (any natural)</h3>
-      <div class="summary-grid">
-        <div class="summary-item">
-          <span>Cost actual total</span>
-          <span id="totalActual">€27.702</span>
+    <div class="results-section">
+        <h2>Impacto Anual Estimado</h2>
+        
+        <div class="result-item">
+            <span>Coste Eléctrico:</span>
+            <span id="res-elec-cost">0 €</span>
         </div>
-        <div class="summary-item">
-          <span>Estalvi anual</span>
-          <span id="totalSaving" style="color:var(--success);">€0</span>
+        <div class="result-item">
+            <span>Coste de Agua:</span>
+            <span id="res-agua-cost">0 €</span>
         </div>
-        <div class="summary-item">
-          <span>Cost final amb reduccions</span>
-          <span id="totalFinal">€27.702</span>
+        <div class="result-item">
+            <span>Emisiones de CO₂:</span>
+            <span id="res-co2">0 kg</span>
         </div>
-        <div class="summary-item">
-          <span>% d'estalvi total</span>
-          <span id="totalPct">0%</span>
+        
+        <div class="result-item total-savings">
+            <span>Ahorro Económico Total:</span>
+            <span id="res-ahorro">0 €</span>
         </div>
-      </div>
     </div>
-  </section>
-
-  <!-- ========== SECCIÓ 3: GRÀFICS ========== -->
-  <section>
-    <h2>📈 Visualització comparativa</h2>
-    <div class="charts-grid">
-      <div class="chart-wrapper">
-        <h3>Costos: actual vs. amb reduccions (€)</h3>
-        <canvas id="chartCost" role="img" aria-label="Comparativa de costos per indicador"></canvas>
-      </div>
-      <div class="chart-wrapper">
-        <h3>Distribució del CO₂ per indicador</h3>
-        <canvas id="chartCO2" role="img" aria-label="Emissions CO2 per indicador"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== SECCIÓ 4: GUIA DETALLADA ========== -->
-  <section>
-    <h2>🛠️ Guia detallada de reduccions per indicador</h2>
-    <p class="section-desc">Accions concretes amb impacte quantificat per assolir el 30% en 3 anys.</p>
-
-    <div class="improvements-grid">
-
-      <div class="improvement-card">
-        <h3>⚡ Electricitat — Accions específiques</h3>
-        <ul>
-          <li><strong>Apagat GPOs (22:00):</strong> −8% consum nocturn</li>
-          <li><strong>Virtualització servidors:</strong> −12% computing</li>
-          <li><strong>Ampliació solar 30→50 kWp:</strong> −10% xarxa</li>
-          <li><strong>Climatització intel·ligent:</strong> −5% estacional</li>
-          <li><strong>Total potencial: −30% → €6.049/any</strong></li>
-        </ul>
-      </div>
-
-      <div class="improvement-card">
-        <h3>💧 Água — Accions específiques</h3>
-        <ul>
-          <li><strong>Reparació fuites:</strong> −15% consum nocturn</li>
-          <li><strong>Airejadors sensoritzats:</strong> −8% lavabos</li>
-          <li><strong>Assecadors vs. paper:</strong> −10% neteja</li>
-          <li><strong>Recirculació água pluja:</strong> −5% reg/jardins</li>
-          <li><strong>Total potencial: −30% → €626/any</strong></li>
-        </ul>
-      </div>
-
-      <div class="improvement-card">
-        <h3>📄 Consumibles — Accions específiques</h3>
-        <ul>
-          <li><strong>Digitalització:</strong> −40% paper oficina</li>
-          <li><strong>Impressió doble cara:</strong> −30% paper</li>
-          <li><strong>Retoladors reutilitzables:</strong> −50% cost</li>
-          <li><strong>Cartutxos regenerats:</strong> −20% cost tòner</li>
-          <li><strong>Total potencial: −30% → €189/any</strong></li>
-        </ul>
-      </div>
-
-      <div class="improvement-card">
-        <h3>🧼 Neteja — Accions específiques</h3>
-        <ul>
-          <li><strong>Assecadors elèctrics:</strong> −60% paper higiènic</li>
-          <li><strong>Productes ecocertificats:</strong> −10% impacte CO₂</li>
-          <li><strong>Màquina eficient:</strong> −15% água/energia</li>
-          <li><strong>Neteja preventiva:</strong> −25% urgències</li>
-          <li><strong>Total potencial: −30% → €1.446/any</strong></li>
-        </ul>
-      </div>
-
-    </div>
-  </section>
-
-  <footer>
-    <p>TA08 · Calculadora d'Estalvi Energètic · Institut Tecnològic de Barcelona · 2025</p>
-  </footer>
-
-</main>
+</div>
 
 <script>
-// ============================================================
-// DADES BASE (de dataclean.json)
-// ============================================================
-const BASE = {
-  elec:        { anyKwh: 117857, preuKwh: 0.171, co2KgKwh: 0.181 },
-  agua:        { anyM3: 1160,    preuM3: 1.80,   co2KgM3: 2.0    },
-  consumibles: { anyFulls: 7500, preuFull: 0.084, retoladors: 150 },
-  neteja:      { anyCost: 4820,  co2Kg: 120                       }
-};
+    // Datos base extraídos del JSON (dataclean.pdf)
+    const base = {
+        electricidad: {
+            consumo_kWh: 117857,
+            precio_eur: 0.171,
+            produccion_solar: 11120,
+            co2_factor: 0.181
+        },
+        agua: {
+            consumo_m3: 1160,
+            precio_eur: 1.80
+        }
+    };
 
-// ============================================================
-// UTILITIATS
-// ============================================================
-function rval(id)  { return parseInt(document.getElementById(id).value); }
-function el(id)    { return document.getElementById(id); }
-function fmt(n)    { return Math.round(n).toLocaleString('ca'); }
-function pct(v)    { return (v >= 0 ? '+' : '') + v + '%'; }
+    // Costes sin aplicar ninguna medida (Línea base)
+    const costeBaseElec = base.electricidad.consumo_kWh * base.electricidad.precio_eur;
+    const costeBaseAgua = base.agua.consumo_m3 * base.agua.precio_eur;
+    const costeBaseTotal = costeBaseElec + costeBaseAgua;
 
-function setLabel(inputId, labelId) {
-  const v = rval(inputId);
-  el(labelId).textContent = (v > 0 ? '+' : '') + v + '%';
-}
+    function calcular() {
+        // Leer estado de los checkboxes
+        const usaSolar = document.getElementById('toggle-solar').checked;
+        const usaMantenimiento = document.getElementById('toggle-mantenimiento').checked;
+        const usaAhorroAgua = document.getElementById('toggle-aigua').checked;
 
-// ============================================================
-// ESTACIONALITAT
-// Distribueix el consum realment entre mesos
-// ============================================================
-function applySeasonality(baseAnnual, indicator, months) {
-  const winterElec  = rval('winterElec')    / 100;
-  const summerElec  = rval('summerElec')    / 100;
-  const summerWater = rval('summerWater')   / 100;
-  const school      = rval('schoolActivity')/ 100;
+        // --- CÁLCULO ELECTRICIDAD ---
+        let consumoElecActual = base.electricidad.consumo_kWh;
+        
+        if (usaMantenimiento) {
+            consumoElecActual *= 0.85; // 15% de reducción
+        }
+        if (usaSolar) {
+            consumoElecActual -= base.electricidad.produccion_solar;
+        }
+        
+        // Evitar consumos negativos
+        consumoElecActual = Math.max(0, consumoElecActual);
+        
+        const costeElecActual = consumoElecActual * base.electricidad.precio_eur;
+        const co2Actual = consumoElecActual * base.electricidad.co2_factor;
 
-  const monthly = baseAnnual / 12;
-  let total = 0;
+        // --- CÁLCULO AGUA ---
+        let consumoAguaActual = base.agua.consumo_m3;
+        
+        if (usaAhorroAgua) {
+            consumoAguaActual *= 0.90; // 10% de reducción
+        }
+        
+        const costeAguaActual = consumoAguaActual * base.agua.precio_eur;
 
-  for (let m = 1; m <= months; m++) {
-    let factor = 1;
-    if (indicator === 'elec') {
-      if (m === 12 || m === 1 || m === 2) factor = 1 + winterElec;
-      else if (m === 6 || m === 7 || m === 8) factor = 1 + summerElec;
+        // --- CÁLCULO DE AHORRO ---
+        const costeTotalActual = costeElecActual + costeAguaActual;
+        const ahorroTotal = costeBaseTotal - costeTotalActual;
+
+        // --- ACTUALIZAR LA PÁGINA (DOM) ---
+        document.getElementById('res-elec-cost').innerText = costeElecActual.toFixed(2) + ' €';
+        document.getElementById('res-agua-cost').innerText = costeAguaActual.toFixed(2) + ' €';
+        document.getElementById('res-co2').innerText = co2Actual.toFixed(2) + ' kg';
+        document.getElementById('res-ahorro').innerText = ahorroTotal.toFixed(2) + ' €';
     }
-    if (indicator === 'agua') {
-      if (m === 6 || m === 7 || m === 8) factor = 1 + summerWater;
-    }
-    if (indicator === 'consumibles' || indicator === 'neteja') {
-      if (m !== 7 && m !== 8) factor = 1 + school;
-    }
-    total += monthly * factor;
-  }
-  return total;
-}
 
-// ============================================================
-// CÁLCULS INDIVIDUALS
-// ============================================================
-function calcElecAny() {
-  const base = applySeasonality(BASE.elec.anyKwh, 'elec', 12);
-  const red  = rval('elecRed') / 100;
-  const val  = base * (1 - red);
-  return { val, cost: val * BASE.elec.preuKwh, saved: base - val, savedCost: (base - val) * BASE.elec.preuKwh };
-}
-
-function calcElecAcademic() {
-  const base = applySeasonality(BASE.elec.anyKwh, 'elec', 10);
-  const red  = rval('elecRed') / 100;
-  const val  = base * (1 - red);
-  return { val, cost: val * BASE.elec.preuKwh, saved: base - val, savedCost: (base - val) * BASE.elec.preuKwh };
-}
-
-function calcAguaAny() {
-  const base = applySeasonality(BASE.agua.anyM3, 'agua', 12);
-  const red  = rval('waterRed') / 100;
-  const val  = base * (1 - red);
-  return { val, cost: val * BASE.agua.preuM3, saved: base - val, savedCost: (base - val) * BASE.agua.preuM3 };
-}
-
-function calcAguaAcademic() {
-  const base = applySeasonality(BASE.agua.anyM3, 'agua', 10);
-  const red  = rval('waterRed') / 100;
-  const val  = base * (1 - red);
-  return { val, cost: val * BASE.agua.preuM3, saved: base - val, savedCost: (base - val) * BASE.agua.preuM3 };
-}
-
-function calcConsumiblesAny() {
-  const base = applySeasonality(BASE.consumibles.anyFulls, 'consumibles', 12);
-  const red  = rval('consumerRed') / 100;
-  const val  = base * (1 - red);
-  const cost = val * BASE.consumibles.preuFull + BASE.consumibles.retoladors;
-  const baseCost = BASE.consumibles.anyFulls * BASE.consumibles.preuFull + BASE.consumibles.retoladors;
-  return { val, cost, saved: base - val, savedCost: baseCost - cost };
-}
-
-function calcConsumiblesAcademic() {
-  const base = applySeasonality(BASE.consumibles.anyFulls, 'consumibles', 10);
-  const red  = rval('consumerRed') / 100;
-  const val  = base * (1 - red);
-  const cost = val * BASE.consumibles.preuFull + BASE.consumibles.retoladors * (10/12);
-  const baseCost = base * BASE.consumibles.preuFull + BASE.consumibles.retoladors * (10/12);
-  return { val, cost, saved: base - val, savedCost: baseCost - cost };
-}
-
-function calcNetejaAny() {
-  const base = applySeasonality(BASE.neteja.anyCost, 'neteja', 12);
-  const red  = rval('cleanRed') / 100;
-  const val  = base * (1 - red);
-  const co2  = BASE.neteja.co2Kg * (1 - red);
-  return { val, co2: Math.round(co2), saved: base - val, savedCost: base - val };
-}
-
-function calcNetejaAcademic() {
-  const base = applySeasonality(BASE.neteja.anyCost, 'neteja', 10);
-  const red  = rval('cleanRed') / 100;
-  const val  = base * (1 - red);
-  const co2  = BASE.neteja.co2Kg * (10/12) * (1 - red);
-  return { val, co2: Math.round(co2), saved: base - val, savedCost: base - val };
-}
-
-// ============================================================
-// ACTUALITZAR DOM
-// ============================================================
-function updateAll() {
-  // Labels dels sliders
-  ['winterElec','summerElec','summerWater','schoolActivity'].forEach(id => {
-    const v = rval(id);
-    el(id + 'Val').textContent = (v >= 0 ? '+' : '') + v + '%';
-  });
-  ['elecRed','waterRed','consumerRed','cleanRed'].forEach(id => {
-    el(id + 'Val').textContent = rval(id) + '%';
-  });
-  // Custom months label
-  const cm = parseInt(el('customMonths').value) || 6;
-  el('customLabel').textContent = cm + ' mes' + (cm === 1 ? '' : 'os');
-
-  // Els 8 cálculs
-  const e1 = calcElecAny();
-  const e2 = calcElecAcademic();
-  const a3 = calcAguaAny();
-  const a4 = calcAguaAcademic();
-  const c5 = calcConsumiblesAny();
-  const c6 = calcConsumiblesAcademic();
-  const n7 = calcNetejaAny();
-  const n8 = calcNetejaAcademic();
-
-  // 1 Electricitat any
-  el('c1').textContent      = fmt(e1.val) + ' kWh';
-  el('c1cost').textContent  = '€' + fmt(e1.cost);
-  el('c1saving').textContent= 'Reducció: ' + fmt(e1.saved) + ' kWh estalviats';
-
-  // 2 Electricitat acadèmic
-  el('c2').textContent      = fmt(e2.val) + ' kWh';
-  el('c2cost').textContent  = '€' + fmt(e2.cost);
-  el('c2saving').textContent= 'Reducció: ' + fmt(e2.saved) + ' kWh estalviats';
-
-  // 3 Água any
-  el('c3').textContent      = fmt(a3.val) + ' m³';
-  el('c3cost').textContent  = '€' + fmt(a3.cost);
-  el('c3saving').textContent= 'Reducció: ' + fmt(a3.saved) + ' m³ estalviats';
-
-  // 4 Água acadèmic
-  el('c4').textContent      = fmt(a4.val) + ' m³';
-  el('c4cost').textContent  = '€' + fmt(a4.cost);
-  el('c4saving').textContent= 'Reducció: ' + fmt(a4.saved) + ' m³ estalviats';
-
-  // 5 Consumibles any
-  el('c5').textContent      = fmt(c5.val) + ' fulls';
-  el('c5cost').textContent  = '€' + fmt(c5.cost);
-  el('c5saving').textContent= 'Reducció: ' + fmt(c5.saved) + ' fulls estalviats';
-
-  // 6 Consumibles acadèmic
-  el('c6').textContent      = fmt(c6.val) + ' fulls';
-  el('c6cost').textContent  = '€' + fmt(c6.cost);
-  el('c6saving').textContent= 'Reducció: ' + fmt(c6.saved) + ' fulls estalviats';
-
-  // 7 Neteja any
-  el('c7').textContent      = '€' + fmt(n7.val);
-  el('c7cost').textContent  = n7.co2 + ' kg CO₂';
-  el('c7saving').textContent= 'Reducció: €' + fmt(n7.saved) + ' estalviats';
-
-  // 8 Neteja acadèmic
-  el('c8').textContent      = '€' + fmt(n8.val);
-  el('c8cost').textContent  = n8.co2 + ' kg CO₂';
-  el('c8saving').textContent= 'Reducció: €' + fmt(n8.saved) + ' estalviats';
-
-  // Resum
-  const totalActual = e1.cost + a3.cost + c5.cost + n7.val
-                    + (BASE.elec.anyKwh * BASE.elec.preuKwh - e1.cost)
-                    + (BASE.agua.anyM3 * BASE.agua.preuM3 - a3.cost)
-                    + (BASE.consumibles.anyFulls * BASE.consumibles.preuFull + BASE.consumibles.retoladors - c5.cost)
-                    + (BASE.neteja.anyCost - n7.val);
-
-  const baseCostTotal = BASE.elec.anyKwh * BASE.elec.preuKwh
-                      + BASE.agua.anyM3  * BASE.agua.preuM3
-                      + BASE.consumibles.anyFulls * BASE.consumibles.preuFull + BASE.consumibles.retoladors
-                      + BASE.neteja.anyCost;
-
-  const finalCost = e1.cost + a3.cost + c5.cost + n7.val;
-  const saving    = baseCostTotal - finalCost;
-  const pctSaving = Math.round(saving / baseCostTotal * 100);
-
-  el('totalActual').textContent = '€' + fmt(baseCostTotal);
-  el('totalSaving').textContent = '€' + fmt(saving);
-  el('totalFinal').textContent  = '€' + fmt(finalCost);
-  el('totalPct').textContent    = pctSaving + '%';
-
-  // Gràfics
-  updateCharts(e1, a3, c5, n7, baseCostTotal, finalCost);
-}
-
-// ============================================================
-// GRÀFICS
-// ============================================================
-let chartCost = null, chartCO2 = null;
-
-function updateCharts(e1, a3, c5, n7, baseCostTotal, finalCost) {
-  const baseCosts = [
-    Math.round(BASE.elec.anyKwh * BASE.elec.preuKwh),
-    Math.round(BASE.agua.anyM3  * BASE.agua.preuM3),
-    Math.round(BASE.consumibles.anyFulls * BASE.consumibles.preuFull + BASE.consumibles.retoladors),
-    Math.round(BASE.neteja.anyCost)
-  ];
-  const redCosts = [
-    Math.round(e1.cost),
-    Math.round(a3.cost),
-    Math.round(c5.cost),
-    Math.round(n7.val)
-  ];
-
-  // Gràfic barres costos
-  if (chartCost) chartCost.destroy();
-  chartCost = new Chart(el('chartCost'), {
-    type: 'bar',
-    data: {
-      labels: ['Electricitat', 'Água', 'Consumibles', 'Neteja'],
-      datasets: [
-        { label: 'Cost actual (€)', data: baseCosts, backgroundColor: 'rgba(220,38,38,0.65)', borderColor: '#dc2626', borderWidth: 1 },
-        { label: 'Cost amb reduccions (€)', data: redCosts, backgroundColor: 'rgba(16,185,129,0.65)', borderColor: '#10b981', borderWidth: 1 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } },
-      scales: { y: { beginAtZero: true, ticks: { callback: v => '€' + v.toLocaleString() } } }
-    }
-  });
-
-  // Gràfic donut CO₂
-  const co2Elec  = Math.round(BASE.elec.anyKwh * BASE.elec.co2KgKwh);
-  const co2Agua  = Math.round(BASE.agua.anyM3  * BASE.agua.co2KgM3);
-  const co2Net   = BASE.neteja.co2Kg;
-
-  if (chartCO2) chartCO2.destroy();
-  chartCO2 = new Chart(el('chartCO2'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Electricitat', 'Água', 'Neteja'],
-      datasets: [{
-        data: [co2Elec, co2Agua, co2Net],
-        backgroundColor: ['rgba(220,38,38,0.7)', 'rgba(59,130,246,0.7)', 'rgba(245,158,11,0.7)'],
-        borderColor: ['#dc2626', '#3b82f6', '#f59e0b'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom' } }
-    }
-  });
-}
-
-// ============================================================
-// EVENTS — qualsevol canvi recalcula tot
-// ============================================================
-document.querySelectorAll('input[type="range"], input[type="number"]').forEach(inp => {
-  inp.addEventListener('input', updateAll);
-});
-
-// Inicialitzar
-document.addEventListener('DOMContentLoaded', updateAll);
+    // Ejecutar el cálculo al cargar la página por primera vez
+    window.onload = calcular;
 </script>
+
 </body>
 </html>
