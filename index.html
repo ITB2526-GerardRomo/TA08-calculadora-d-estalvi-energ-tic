@@ -1,177 +1,482 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Calculadora d'Estalvi Energètic interactiva per a centres educatius.">
-  <title>EcoCalc ITB — Calculadora d'Estalvi</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS · Pla de Sostenibilitat ITB</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <div class="bg-layer" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-orb bg-orb--1"></div>
-    <div class="bg-orb bg-orb--2"></div>
-  </div>
+  <!-- NOISE OVERLAY -->
+  <div class="noise"></div>
 
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="header-brand">
-        <span class="brand-icon" aria-hidden="true">🌐</span>
-        <div>
-          <span class="brand-name">EcoCalc <em>ITB</em></span>
-          <span class="brand-tag">Plan de Reducción a 3 años</span>
-        </div>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">NEXUS</span>
+        <span class="brand-sub">ITB · Sostenibilitat</span>
       </div>
-      <nav class="header-nav" aria-label="Seccions">
-        <a href="#indicadors" class="nav-link">Indicadores de Acción</a>
-        <a href="#resultats"  class="nav-link">Resultados</a>
-        <a href="#grafic"     class="nav-link">Proyección</a>
+      <nav class="header-nav">
+        <a href="#calculadora" class="nav-item">Calculadora</a>
+        <a href="#indicadors" class="nav-item">Indicadors</a>
+        <a href="#roadmap" class="nav-item">Roadmap</a>
       </nav>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">CALCULANT...</span>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="hero" aria-label="Introducció">
+
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-grid-bg"></div>
       <div class="hero-content">
-        <span class="hero-badge">Plan de Viabilidad ITB</span>
-        <h1 class="hero-title">
-          Proyección de<br>
-          <span class="hero-accent">Eficiencia Energética</span>
-        </h1>
-        <p class="hero-desc">
-          Ajusta los indicadores del plan de acción. El sistema calculará el impacto de forma realista, con un objetivo máximo de reducción del 30% en un periodo de 3 años.
-        </p>
-        <div class="hero-stats" role="list">
-          <div class="hero-stat" role="listitem">
-            <span class="hstat-val" id="hs-saving">0 €</span>
-            <span class="hstat-lbl">Ahorro proyectado</span>
+        <div class="hero-tag">Institut Tecnològic de Barcelona · Fase 3</div>
+        <h1 class="hero-title">Redueix l'impacte.<br/><em>Mesura cada pas.</em></h1>
+        <p class="hero-desc">Ajusta les mesures d'eficiència i veu en temps real com canvia el consum del centre. Objectiu: −30% en 3 anys.</p>
+        <div class="hero-metrics" id="heroMetrics">
+          <div class="hero-metric">
+            <span class="hm-val" id="hmReduction">0%</span>
+            <span class="hm-lbl">Reducció total</span>
           </div>
-          <div class="hero-stat" role="listitem">
-            <span class="hstat-val" id="hs-co2">0 t</span>
-            <span class="hstat-lbl">CO₂ evitado</span>
+          <div class="hero-metric">
+            <span class="hm-val" id="hmSaving">0€</span>
+            <span class="hm-lbl">Estalvi anual</span>
           </div>
-          <div class="hero-stat" role="listitem">
-            <span class="hstat-val" id="hs-pct">0%</span>
-            <span class="hstat-lbl">Reducción Total (Máx 30%)</span>
+          <div class="hero-metric">
+            <span class="hm-val" id="hmCO2">0 kg</span>
+            <span class="hm-lbl">CO₂ evitat</span>
           </div>
-          <div class="hero-stat" role="listitem">
-            <span class="hstat-val" id="hs-cost">— €</span>
-            <span class="hstat-lbl">Coste base</span>
+        </div>
+      </div>
+      <div class="hero-scroll-hint">↓ Scroll per explorar</div>
+    </section>
+
+    <!-- CALCULADORA + GRÀFICS -->
+    <section class="section" id="calculadora">
+      <div class="section-label">01 · CALCULADORA</div>
+      <div class="calc-layout">
+
+        <!-- CONTROLS -->
+        <div class="controls-panel">
+          <h2 class="panel-title">Mesures d'eficiència</h2>
+          <p class="panel-sub">Activa i ajusta cada mesura. Els gràfics s'actualitzen al moment.</p>
+
+          <div class="measure-group">
+            <div class="group-title">
+              <span class="group-icon">⚡</span> Energia elèctrica
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Il·luminació LED</label>
+                <span class="measure-impact" id="lbl-led">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-led" checked data-group="energia" data-max="8" />
+                <input type="range" class="slider" id="sld-led" min="0" max="8" step="1" value="5" data-label="lbl-led" />
+              </div>
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Sensors presència</label>
+                <span class="measure-impact" id="lbl-sensors">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-sensors" data-group="energia" data-max="5" />
+                <input type="range" class="slider" id="sld-sensors" min="0" max="5" step="1" value="3" data-label="lbl-sensors" />
+              </div>
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Apagat equips nit</label>
+                <span class="measure-impact" id="lbl-apagat">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-apagat" data-group="energia" data-max="4" />
+                <input type="range" class="slider" id="sld-apagat" min="0" max="4" step="1" value="2" data-label="lbl-apagat" />
+              </div>
+            </div>
+          </div>
+
+          <div class="measure-group">
+            <div class="group-title">
+              <span class="group-icon">💧</span> Consum d'aigua
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Airejadors grifo</label>
+                <span class="measure-impact" id="lbl-airejadors">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-airejadors" data-group="aigua" data-max="6" />
+                <input type="range" class="slider" id="sld-airejadors" min="0" max="6" step="1" value="4" data-label="lbl-airejadors" />
+              </div>
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Detecció fugues</label>
+                <span class="measure-impact" id="lbl-fugues">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-fugues" data-group="aigua" data-max="5" />
+                <input type="range" class="slider" id="sld-fugues" min="0" max="5" step="1" value="3" data-label="lbl-fugues" />
+              </div>
+            </div>
+          </div>
+
+          <div class="measure-group">
+            <div class="group-title">
+              <span class="group-icon">📎</span> Consumibles i neteja
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Impressió responsable</label>
+                <span class="measure-impact" id="lbl-impressio">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-impressio" data-group="consumibles" data-max="6" />
+                <input type="range" class="slider" id="sld-impressio" min="0" max="6" step="1" value="4" data-label="lbl-impressio" />
+              </div>
+            </div>
+
+            <div class="measure-row">
+              <div class="measure-info">
+                <label class="measure-name">Productes ecològics</label>
+                <span class="measure-impact" id="lbl-eco">+0%</span>
+              </div>
+              <div class="measure-controls">
+                <input type="checkbox" class="toggle" id="chk-eco" data-group="consumibles" data-max="4" />
+                <input type="range" class="slider" id="sld-eco" min="0" max="4" step="1" value="2" data-label="lbl-eco" />
+              </div>
+            </div>
+          </div>
+
+          <!-- TOTAL BAR -->
+          <div class="total-bar">
+            <div class="total-bar-header">
+              <span>Reducció aplicada</span>
+              <span class="total-pct" id="totalPct">0%</span>
+            </div>
+            <div class="total-bar-track">
+              <div class="total-bar-fill" id="totalFill"></div>
+              <div class="total-bar-cap"></div>
+            </div>
+            <div class="total-bar-footer">
+              <span>0%</span><span>Objectiu: 30%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRÀFICS -->
+        <div class="charts-panel">
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-tab="anual">Any complet</button>
+            <button class="chart-tab" data-tab="escolar">Període escolar</button>
+            <button class="chart-tab" data-tab="donut">Distribució</button>
+          </div>
+
+          <div class="chart-pane active" id="pane-anual">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Consum anual comparat</div>
+                <div class="chart-subtitle">Tots els indicadors · Any complet (12 mesos)</div>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-dot" style="background:#c8f542"></span> Actual
+                <span class="legend-dot" style="background:#4af4c8; margin-left:12px"></span> Amb mesures
+              </div>
+            </div>
+            <canvas id="chartAnual"></canvas>
+          </div>
+
+          <div class="chart-pane" id="pane-escolar">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Consum període escolar</div>
+                <div class="chart-subtitle">Set–Jun · 10 mesos lectius</div>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-dot" style="background:#c8f542"></span> Actual
+                <span class="legend-dot" style="background:#4af4c8; margin-left:12px"></span> Amb mesures
+              </div>
+            </div>
+            <canvas id="chartEscolar"></canvas>
+          </div>
+
+          <div class="chart-pane" id="pane-donut">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Distribució de costos</div>
+                <div class="chart-subtitle">Pes relatiu de cada indicador</div>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <canvas id="chartDonut"></canvas>
+              <div class="donut-center" id="donutCenter">
+                <span class="donut-val">—</span>
+                <span class="donut-lbl">Total anual</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- INDICADORS -->
     <section class="section" id="indicadors">
-      <div class="container">
-        <header class="section-head">
-          <span class="section-tag">Plan de Acción</span>
-          <h2 class="section-title">Palancas de Reducción</h2>
-        </header>
+      <div class="section-label">02 · INDICADORS</div>
+      <h2 class="section-title">Els 8 indicadors de consum</h2>
+      <p class="section-desc">Cada mesura que actives afecta directament els valors de sota. Veus l'impacte en temps real.</p>
 
-        <div class="ind-block">
-          <div class="ind-block-label"><span class="ind-block-icon">⚡</span> Electricidad</div>
-          <div class="indicators-grid" id="grid-elect">
-            <article class="ind-card" data-group="elect">
-              <div class="ind-header">
-                <div class="ind-icon-wrap" style="--ic: #56c3f7">💡</div>
-                <label class="toggle-switch">
-                  <input type="checkbox" class="ind-toggle" data-key="elect-red" checked>
-                  <span class="toggle-knob"></span>
-                </label>
-              </div>
-              <h3 class="ind-title">Optimización de Iluminación</h3>
-              <p class="ind-desc">LEDs y detectores de presencia en pasillos.</p>
-              <div class="ind-slider-wrap">
-                <label class="slider-label">Impacto: <strong class="slider-val" id="val-elect-red">20%</strong></label>
-                <input type="range" class="ind-slider" id="sld-elect-red" min="0" max="40" step="1" value="20" data-key="elect-red">
-              </div>
-              <div class="ind-saving-badge" id="badge-elect-red"></div>
-            </article>
-
-            <article class="ind-card" data-group="elect">
-              <div class="ind-header">
-                <div class="ind-icon-wrap" style="--ic: #f2bf44">☀️</div>
-                <label class="toggle-switch">
-                  <input type="checkbox" class="ind-toggle" data-key="elect-solar" checked>
-                  <span class="toggle-knob"></span>
-                </label>
-              </div>
-              <h3 class="ind-title">Autoconsumo Solar</h3>
-              <p class="ind-desc">Ampliación de paneles fotovoltaicos.</p>
-              <div class="ind-slider-wrap">
-                <label class="slider-label">Autoconsumo: <strong class="slider-val" id="val-elect-solar">15%</strong></label>
-                <input type="range" class="ind-slider" id="sld-elect-solar" min="0" max="30" step="1" value="15" data-key="elect-solar">
-              </div>
-              <div class="ind-saving-badge" id="badge-elect-solar"></div>
-            </article>
-
-            <article class="ind-card" data-group="elect">
-              <div class="ind-header">
-                <div class="ind-icon-wrap" style="--ic: #b8a0f8">❄️</div>
-                <label class="toggle-switch">
-                  <input type="checkbox" class="ind-toggle" data-key="elect-clima">
-                  <span class="toggle-knob"></span>
-                </label>
-              </div>
-              <h3 class="ind-title">Gestión de Climatización</h3>
-              <p class="ind-desc">Limitación térmica a 21ºC invierno / 26ºC verano.</p>
-              <div class="ind-slider-wrap">
-                <label class="slider-label">Impacto: <strong class="slider-val" id="val-elect-clima">0%</strong></label>
-                <input type="range" class="ind-slider" id="sld-elect-clima" min="0" max="20" step="1" value="0" data-key="elect-clima">
-              </div>
-              <div class="ind-saving-badge" id="badge-elect-clima"></div>
-            </article>
-          </div>
-        </div>
-
-        <div class="ind-block">
-          <div class="ind-block-label"><span class="ind-block-icon">💧</span> Agua</div>
-          <div class="indicators-grid" id="grid-agua">
-            <article class="ind-card" data-group="agua">
-              <div class="ind-header">
-                <div class="ind-icon-wrap" style="--ic: #44c6b0">🚿</div>
-                <label class="toggle-switch">
-                  <input type="checkbox" class="ind-toggle" data-key="agua-red" checked>
-                  <span class="toggle-knob"></span>
-                </label>
-              </div>
-              <h3 class="ind-title">Grifos Temporizados</h3>
-              <p class="ind-desc">Reducción de caudal y tiempo de flujo.</p>
-              <div class="ind-slider-wrap">
-                <label class="slider-label">Reducción: <strong class="slider-val" id="val-agua-red">15%</strong></label>
-                <input type="range" class="ind-slider" id="sld-agua-red" min="0" max="25" step="1" value="15" data-key="agua-red">
-              </div>
-              <div class="ind-saving-badge" id="badge-agua-red"></div>
-            </article>
-          </div>
-        </div>
+      <div class="indicators-grid" id="indicatorsGrid">
+        <!-- Filled by JS -->
       </div>
     </section>
 
-    <section class="section section--dark" id="grafic">
-      <div class="container">
-        <header class="section-head">
-          <span class="section-tag">Proyección a 3 años</span>
-          <h2 class="section-title">Impacto Global del Plan</h2>
-          <p class="section-desc">Comparativa del consumo base frente a la proyección tras aplicar las medidas seleccionadas.</p>
-        </header>
+    <!-- ROADMAP -->
+    <section class="section" id="roadmap">
+      <div class="section-label">03 · ROADMAP</div>
+      <h2 class="section-title">Pla d'acció 3 anys</h2>
+      <p class="section-desc">Accions concretes d'economia circular per assolir el −30% de manera realista i verificable.</p>
 
-        <div class="chart-container" style="position: relative; height:450px; width:100%; max-width: 900px; margin: 0 auto; background: var(--bg3); padding: 20px; border-radius: 16px; border: 1px solid var(--border);">
-          <canvas id="mainChart"></canvas>
+      <div class="roadmap-timeline">
+
+        <div class="roadmap-year" data-year="1">
+          <div class="year-header">
+            <div class="year-num">Any 1</div>
+            <div class="year-theme">Diagnòstic i guanys ràpids</div>
+            <div class="year-target">Objectiu: −8%</div>
+          </div>
+          <div class="year-actions">
+
+            <div class="action-card">
+              <div class="action-icon">🔍</div>
+              <div class="action-body">
+                <div class="action-title">Auditoria energètica completa</div>
+                <div class="action-desc">Mesura real de kWh per zona i equip. Detecta els 3 punts calents de consum.</div>
+                <div class="action-tags">
+                  <span class="tag tag-green">Electricitat</span>
+                  <span class="tag tag-blue">Dades</span>
+                </div>
+              </div>
+              <div class="action-saving">−2%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">💡</div>
+              <div class="action-body">
+                <div class="action-title">Substitució progressiva a LED</div>
+                <div class="action-desc">Reutilitzar els fluorescents funcionals en zones de baix pas. Substituir per LED les aules principals.</div>
+                <div class="action-tags">
+                  <span class="tag tag-green">Electricitat</span>
+                  <span class="tag tag-orange">Economia circular</span>
+                </div>
+              </div>
+              <div class="action-saving">−3%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🖨️</div>
+              <div class="action-body">
+                <div class="action-title">Política d'impressió responsable</div>
+                <div class="action-desc">Impressió per defecte a doble cara i escala de grisos. Digitalitzar formularis recurrents.</div>
+                <div class="action-tags">
+                  <span class="tag tag-purple">Consumibles</span>
+                </div>
+              </div>
+              <div class="action-saving">−2%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🔧</div>
+              <div class="action-body">
+                <div class="action-title">Reparació d'equips avariats</div>
+                <div class="action-desc">Crear servei intern de reparació amb l'alumnat de cicles tècnics. Evitar llençar aparells reparables.</div>
+                <div class="action-tags">
+                  <span class="tag tag-orange">Economia circular</span>
+                  <span class="tag tag-blue">Formació</span>
+                </div>
+              </div>
+              <div class="action-saving">−1%</div>
+            </div>
+          </div>
         </div>
+
+        <div class="roadmap-connector">
+          <div class="connector-line"></div>
+          <div class="connector-arrow">↓</div>
+        </div>
+
+        <div class="roadmap-year" data-year="2">
+          <div class="year-header">
+            <div class="year-num">Any 2</div>
+            <div class="year-theme">Optimització i sistemes</div>
+            <div class="year-target">Objectiu acumulat: −18%</div>
+          </div>
+          <div class="year-actions">
+
+            <div class="action-card">
+              <div class="action-icon">📡</div>
+              <div class="action-body">
+                <div class="action-title">Sensors de presència i temperatura</div>
+                <div class="action-desc">Automatitzar l'apagat d'il·luminació i climatització en espais buits. ROI en 18 mesos.</div>
+                <div class="action-tags">
+                  <span class="tag tag-green">Electricitat</span>
+                  <span class="tag tag-blue">IoT</span>
+                </div>
+              </div>
+              <div class="action-saving">−4%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">💧</div>
+              <div class="action-body">
+                <div class="action-title">Sistema de detecció de fugues</div>
+                <div class="action-desc">Instal·lar comptadors intel·ligents. Detectar consums nocturns anormals (= fugues actives).</div>
+                <div class="action-tags">
+                  <span class="tag tag-cyan">Aigua</span>
+                </div>
+              </div>
+              <div class="action-saving">−3%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🧪</div>
+              <div class="action-body">
+                <div class="action-title">Substitució neteja química per ecològica</div>
+                <div class="action-desc">Proveïdors certificats Ecolabel. Reducció de residus químics i costos a llarg termini.</div>
+                <div class="action-tags">
+                  <span class="tag tag-purple">Neteja</span>
+                  <span class="tag tag-orange">Economia circular</span>
+                </div>
+              </div>
+              <div class="action-saving">−2%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">♻️</div>
+              <div class="action-body">
+                <div class="action-title">Reutilització de components IT</div>
+                <div class="action-desc">Catalogar i redistribuir components funcionals dels equips donats de baixa. Crear banc de peces.</div>
+                <div class="action-tags">
+                  <span class="tag tag-orange">Economia circular</span>
+                  <span class="tag tag-blue">RAEE</span>
+                </div>
+              </div>
+              <div class="action-saving">−2%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="roadmap-connector">
+          <div class="connector-line"></div>
+          <div class="connector-arrow">↓</div>
+        </div>
+
+        <div class="roadmap-year" data-year="3">
+          <div class="year-header">
+            <div class="year-num">Any 3</div>
+            <div class="year-theme">Consolidació i economia circular</div>
+            <div class="year-target">Objectiu acumulat: −30%</div>
+          </div>
+          <div class="year-actions">
+
+            <div class="action-card">
+              <div class="action-icon">🌱</div>
+              <div class="action-body">
+                <div class="action-title">Programa de compra verda</div>
+                <div class="action-desc">Clàusules ambientals en tots els contractes de subministrament. Prioritzar productes amb etiqueta ecològica.</div>
+                <div class="action-tags">
+                  <span class="tag tag-green">Procurement</span>
+                  <span class="tag tag-orange">Economia circular</span>
+                </div>
+              </div>
+              <div class="action-saving">−3%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🔋</div>
+              <div class="action-body">
+                <div class="action-title">Autoconsum fotovoltaic (estudi)</div>
+                <div class="action-desc">Avaluar viabilitat de panells solars a coberta. Finançament via subvencions IDAE i Generalitat.</div>
+                <div class="action-tags">
+                  <span class="tag tag-green">Electricitat</span>
+                  <span class="tag tag-blue">Inversió</span>
+                </div>
+              </div>
+              <div class="action-saving">−3%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">🎓</div>
+              <div class="action-body">
+                <div class="action-title">Alumnat com a agent de canvi</div>
+                <div class="action-desc">Projectes de cicles vinculats a la reducció real del centre. Mesures auditades per l'alumnat cada trimestre.</div>
+                <div class="action-tags">
+                  <span class="tag tag-blue">Formació</span>
+                  <span class="tag tag-orange">Comunitat</span>
+                </div>
+              </div>
+              <div class="action-saving">−1%</div>
+            </div>
+
+            <div class="action-card">
+              <div class="action-icon">📊</div>
+              <div class="action-body">
+                <div class="action-title">Informe anual de sostenibilitat</div>
+                <div class="action-desc">Publicar dades reals de consum i assoliments. Transparència = responsabilitat = millora contínua.</div>
+                <div class="action-tags">
+                  <span class="tag tag-purple">Reporting</span>
+                  <span class="tag tag-blue">ESG</span>
+                </div>
+              </div>
+              <div class="action-saving">−1%</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section">
+      <div class="cta-bg"></div>
+      <div class="cta-content">
+        <div class="cta-label">Listo per implementar?</div>
+        <h2 class="cta-title">Activa el pla complet</h2>
+        <p class="cta-desc">Aplica automàticament totes les mesures d'eficiència al màxim i veu el potencial de reducció total del centre.</p>
+        <button class="cta-btn" id="implementBtn">
+          <span class="cta-btn-icon">⚡</span>
+          Implementar Pla Complet — 30% reducció
+          <span class="cta-btn-arrow">↑</span>
+        </button>
+        <p class="cta-note">* Basado en un plan realista de 3 anys. Reducció màxima aplicada: 30%.</p>
+      </div>
+    </section>
+
   </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-brand">NEXUS · ITB</span>
+      <span class="footer-info">Fase 3 · Sostenibilitat · Dades JSON reals</span>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
