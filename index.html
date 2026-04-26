@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculadora d'Estalvi Energètic interactiva per a centres educatius. Ajusta indicadors i veu l'impacte en temps real.">
+  <title>EcoCalc ITB — Calculadora d'Estalvi Energètic</title>
+
+  <!--
+    ╔══════════════════════════════════════════════════════════╗
+    ║   EcoCalc ITB · Calculadora d'Estalvi Energètic         ║
+    ║   Chart.js carregat des del CDN de jsdelivr              ║
+    ║   Fonts: Syne (display) + DM Mono (monospace)           ║
+    ╚══════════════════════════════════════════════════════════╝
+  -->
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Chart.js v4 · CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ░░░ FONS DECORATIU ░░░ -->
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+  </div>
+
+  <!-- ░░░ NAV ░░░ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-logo" aria-hidden="true">EC</div>
+        <div>
+          <span class="brand-name">EcoCalc <em>ITB</em></span>
+          <span class="brand-tag">Calculadora Energètica</span>
+        </div>
+      </div>
+      <nav class="header-nav" aria-label="Seccions">
+        <a href="#indicadors" class="nav-link">Indicadors</a>
+        <a href="#resultats"  class="nav-link">Resultats</a>
+        <a href="#grafic"     class="nav-link">Gràfic</a>
+        <a href="#pla"        class="nav-link">Pla 3 anys</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ░░░ HERO ░░░ -->
+    <section class="hero" aria-label="Introducció">
+      <div class="hero-content">
+        <span class="hero-badge">Institut Tecnològic de Barcelona · Fase 3</span>
+        <h1 class="hero-title">
+          Calcula el teu<br>
+          <span class="hero-accent">Estalvi Energètic</span>
+        </h1>
+        <p class="hero-desc">
+          Ajusta els indicadors en temps real i veu com es redueix el consum d'energia,
+          aigua i consumibles del centre. Objectiu: –30% en 3 anys.
+        </p>
+        <!-- Estadístiques de capçalera (actualitzades per JS) -->
+        <div class="hero-stats" role="list">
+          <div class="hero-stat" role="listitem">
+            <span class="hstat-val" id="hs-saving">0 €</span>
+            <span class="hstat-lbl">Estalvi anual</span>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hstat-val" id="hs-co2">0 t</span>
+            <span class="hstat-lbl">CO₂ estalviat</span>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hstat-val" id="hs-pct">0%</span>
+            <span class="hstat-lbl">Reducció total</span>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hstat-val" id="hs-cost">— €</span>
+            <span class="hstat-lbl">Cost actual</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░░ BARRA DE PERIODE ░░░ -->
+    <div class="container">
+      <div class="period-bar" role="group" aria-label="Selecció de període">
+        <span class="period-label">Període analitzat:</span>
+        <div class="period-tabs" role="tablist">
+          <button class="ptab active" data-period="anual"   role="tab" aria-selected="true" >📅 Any complet</button>
+          <button class="ptab"        data-period="lectiu"  role="tab" aria-selected="false">🎓 Curs lectiu (Set–Jun)</button>
+          <button class="ptab"        data-period="custom"  role="tab" aria-selected="false">📆 Personalitzat</button>
+        </div>
+        <!-- Dates personalitzades (visibles només quan el periode és "custom") -->
+        <div class="custom-dates" id="customDates" aria-hidden="true">
+          <label for="dateFrom">De</label>
+          <input type="month" id="dateFrom" value="2024-09">
+          <span>fins</span>
+          <input type="month" id="dateTo"   value="2025-06">
+        </div>
+      </div>
+    </div>
+
+    <!-- ░░░ INDICADORS ░░░ -->
+    <section class="section" id="indicadors" aria-labelledby="tit-indicadors">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-tag">Controls</span>
+          <h2 class="section-title" id="tit-indicadors">Indicadors d'Estalvi</h2>
+          <p class="section-desc">
+            Activa i ajusta cada mesura. Cada indicador té assignat un any d'implementació dins del pla de 3 anys. El gràfic i els resultats s'actualitzen instantàniament.
+          </p>
+        </header>
+
+        <!-- Línia de temps del pla -->
+        <div class="year-timeline" aria-label="Línia de temps del pla de 3 anys">
+          <div class="yt-item yt-item--1">
+            <div class="yt-dot"></div>
+            <div class="yt-label">Any 1</div>
+            <div class="yt-desc">Guanys ràpids</div>
+          </div>
+          <div class="yt-line"></div>
+          <div class="yt-item yt-item--2">
+            <div class="yt-dot"></div>
+            <div class="yt-label">Any 2</div>
+            <div class="yt-desc">Inversió</div>
+          </div>
+          <div class="yt-line"></div>
+          <div class="yt-item yt-item--3">
+            <div class="yt-dot"></div>
+            <div class="yt-label">Any 3</div>
+            <div class="yt-desc">Consolidació</div>
+          </div>
+          <div class="yt-goal">
+            <span class="yt-goal-val">–30%</span>
+            <span class="yt-goal-lbl">Objectiu</span>
+          </div>
+        </div>
+
+        <!-- ── BLOC: ELECTRICITAT ── -->
+        <div class="ind-block">
+          <div class="ind-block-label">
+            <span class="ind-block-icon">💡</span> Electricitat
+          </div>
+          <div class="indicators-grid" id="grid-elect">
+
+            <!-- INDICADOR: Reducció il·luminació -->
+            <article class="ind-card" data-group="elect" data-key="elect-red" data-year="1">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #58b6ff">💡</div>
+                <span class="year-badge year-badge--1">Any 1</span>
+                <label class="toggle-switch" title="Activar indicador">
+                  <input type="checkbox" class="ind-toggle" data-key="elect-red" checked>
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Reducció Il·luminació</h3>
+              <p class="ind-desc">Detectors de presència, LEDs i control horari.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Reducció: <strong class="slider-val" id="val-elect-red">20%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-elect-red"
+                       min="0" max="20" step="1" value="20"
+                       data-key="elect-red" aria-label="Percentatge reducció il·luminació">
+                <div class="slider-range-labels"><span>0%</span><span>20%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-elect-red"></div>
+            </article>
+
+            <article class="ind-card" data-group="elect" data-key="elect-solar" data-year="2">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #f0b429">☀️</div>
+                <span class="year-badge year-badge--2">Any 2</span>
+                <label class="toggle-switch" title="Activar indicador">
+                  <input type="checkbox" class="ind-toggle" data-key="elect-solar" checked>
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Panells Fotovoltaics</h3>
+              <p class="ind-desc">30,94 kWp instal·lats + ampliació prevista.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Autoconsum solar: <strong class="slider-val" id="val-elect-solar">15%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-elect-solar"
+                       min="0" max="18" step="1" value="15"
+                       data-key="elect-solar" aria-label="Percentatge autoconsum solar">
+                <div class="slider-range-labels"><span>0%</span><span>18%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-elect-solar"></div>
+            </article>
+
+            <article class="ind-card" data-group="elect" data-key="elect-clima" data-year="3">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #bc8cff">❄️</div>
+                <span class="year-badge year-badge--3">Any 3</span>
+                <label class="toggle-switch" title="Activar indicador">
+                  <input type="checkbox" class="ind-toggle" data-key="elect-clima">
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Control Climatització</h3>
+              <p class="ind-desc">Programació de termòstats i manteniment preventiu.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Estalvi clima: <strong class="slider-val" id="val-elect-clima">0%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-elect-clima"
+                       min="0" max="12" step="1" value="0"
+                       data-key="elect-clima" aria-label="Percentatge estalvi climatització">
+                <div class="slider-range-labels"><span>0%</span><span>12%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-elect-clima"></div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- ── BLOC: AIGUA ── -->
+        <div class="ind-block">
+          <div class="ind-block-label">
+            <span class="ind-block-icon">💧</span> Aigua
+          </div>
+          <div class="indicators-grid" id="grid-agua">
+
+            <article class="ind-card" data-group="agua" data-key="agua-red" data-year="1">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #39d353">💧</div>
+                <span class="year-badge year-badge--1">Any 1</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="agua-red" checked>
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Reducció Consum Aigua</h3>
+              <p class="ind-desc">Aixetes temporitzades, cartells de conscienciació.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Reducció: <strong class="slider-val" id="val-agua-red">15%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-agua-red"
+                       min="0" max="20" step="1" value="15"
+                       data-key="agua-red">
+                <div class="slider-range-labels"><span>0%</span><span>20%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-agua-red"></div>
+            </article>
+
+            <article class="ind-card" data-group="agua" data-key="agua-fugas" data-year="2">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #39d353">🔧</div>
+                <span class="year-badge year-badge--2">Any 2</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="agua-fugas">
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Control de Fugues</h3>
+              <p class="ind-desc">Detecció de consums nocturns i reparació de fugues.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Fugues corregides: <strong class="slider-val" id="val-agua-fugas">0%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-agua-fugas"
+                       min="0" max="15" step="1" value="0"
+                       data-key="agua-fugas">
+                <div class="slider-range-labels"><span>0%</span><span>15%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-agua-fugas"></div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- ── BLOC: CONSUMIBLES ── -->
+        <div class="ind-block">
+          <div class="ind-block-label">
+            <span class="ind-block-icon">📎</span> Consumibles
+          </div>
+          <div class="indicators-grid" id="grid-cons">
+
+            <article class="ind-card" data-group="cons" data-key="cons-papel" data-year="1">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #f0b429">📄</div>
+                <span class="year-badge year-badge--1">Any 1</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="cons-papel" checked>
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Reducció Paper</h3>
+              <p class="ind-desc">Digitalització d'impresos, doble cara, paper reciclat.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Menys impressions: <strong class="slider-val" id="val-cons-papel">25%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-cons-papel"
+                       min="0" max="40" step="1" value="25"
+                       data-key="cons-papel">
+                <div class="slider-range-labels"><span>0%</span><span>40%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-cons-papel"></div>
+            </article>
+
+            <article class="ind-card" data-group="cons" data-key="cons-dig" data-year="2">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #f0b429">💻</div>
+                <span class="year-badge year-badge--2">Any 2</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="cons-dig">
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Digitalització Admin</h3>
+              <p class="ind-desc">Circulars, actes i informes en format digital.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Digitalitzat: <strong class="slider-val" id="val-cons-dig">0%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-cons-dig"
+                       min="0" max="30" step="1" value="0"
+                       data-key="cons-dig">
+                <div class="slider-range-labels"><span>0%</span><span>30%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-cons-dig"></div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- ── BLOC: NETEJA ── -->
+        <div class="ind-block">
+          <div class="ind-block-label">
+            <span class="ind-block-icon">🧹</span> Neteja
+          </div>
+          <div class="indicators-grid" id="grid-limp">
+
+            <article class="ind-card" data-group="limp" data-key="limp-sec" data-year="2">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #bc8cff">♻️</div>
+                <span class="year-badge year-badge--2">Any 2</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="limp-sec">
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Productes Ecològics</h3>
+              <p class="ind-desc">Substitució per productes de baix impacte ambiental.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Substitució: <strong class="slider-val" id="val-limp-sec">0%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-limp-sec"
+                       min="0" max="25" step="1" value="0"
+                       data-key="limp-sec">
+                <div class="slider-range-labels"><span>0%</span><span>25%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-limp-sec"></div>
+            </article>
+
+            <article class="ind-card" data-group="limp" data-key="limp-conc" data-year="3">
+              <div class="ind-header">
+                <div class="ind-icon-wrap" style="--ic: #bc8cff">🧴</div>
+                <span class="year-badge year-badge--3">Any 3</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="ind-toggle" data-key="limp-conc">
+                  <span class="toggle-knob"></span>
+                </label>
+              </div>
+              <h3 class="ind-title">Concentrats i Dosi</h3>
+              <p class="ind-desc">Dosificadors i productes concentrats per reduir residus.</p>
+              <div class="ind-slider-wrap">
+                <label class="slider-label">
+                  Optimització: <strong class="slider-val" id="val-limp-conc">0%</strong>
+                </label>
+                <input type="range" class="ind-slider" id="sld-limp-conc"
+                       min="0" max="20" step="1" value="0"
+                       data-key="limp-conc">
+                <div class="slider-range-labels"><span>0%</span><span>20%</span></div>
+              </div>
+              <div class="ind-saving-badge" id="badge-limp-conc"></div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- Botons ràpids -->
+        <div class="quick-actions">
+          <button class="btn-secondary" id="btnSelectAll">✅ Aplicar tot (–30%)</button>
+          <button class="btn-ghost"    id="btnReset">↺ Restablir valors</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ░░░ RESULTATS ░░░ -->
+    <section class="section section--dark" id="resultats" aria-labelledby="tit-resultats">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-tag section-tag--light">Resultats</span>
+          <h2 class="section-title" id="tit-resultats">Resum de Consum i Estalvi</h2>
+          <p class="section-desc">Valors calculats en temps real segons els indicadors actius.</p>
+        </header>
+
+        <!-- Progrés global -->
+        <div class="progress-panel">
+          <div class="progress-head">
+            <span class="progress-label">Progrés del pla de reducció</span>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            <div class="progress-target" title="Objectiu: 30%"></div>
+          </div>
+          <div class="progress-legend">
+            <span>0%</span>
+            <span class="target-label">🎯 Objectiu 30%</span>
+            <span>Màx.</span>
+          </div>
+        </div>
+
+        <!-- Targetes KPI -->
+        <div class="kpi-grid">
+
+          <!-- ELECTRICITAT -->
+          <div class="kpi-card" id="kpi-elect">
+            <div class="kpi-header">
+              <span class="kpi-icon">💡</span>
+              <h3 class="kpi-name">Electricitat</h3>
+              <span class="kpi-badge" id="kpi-badge-elect"></span>
+            </div>
+            <div class="kpi-rows">
+              <div class="kpi-row">
+                <span class="kpi-row-label">Consum final</span>
+                <span class="kpi-row-val mono" id="r-elect-kwh">—</span>
+                <span class="kpi-row-unit">kWh</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Cost estimat</span>
+                <span class="kpi-row-val mono" id="r-elect-eur">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">CO₂ associat</span>
+                <span class="kpi-row-val mono" id="r-elect-co2">—</span>
+                <span class="kpi-row-unit">kg</span>
+              </div>
+              <div class="kpi-row kpi-row--saving">
+                <span class="kpi-row-label">kWh estalviats</span>
+                <span class="kpi-row-val mono green" id="r-elect-red">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AIGUA -->
+          <div class="kpi-card" id="kpi-agua">
+            <div class="kpi-header">
+              <span class="kpi-icon">💧</span>
+              <h3 class="kpi-name">Aigua</h3>
+              <span class="kpi-badge" id="kpi-badge-agua"></span>
+            </div>
+            <div class="kpi-rows">
+              <div class="kpi-row">
+                <span class="kpi-row-label">Consum final</span>
+                <span class="kpi-row-val mono" id="r-agua-m3">—</span>
+                <span class="kpi-row-unit">m³</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Cost estimat</span>
+                <span class="kpi-row-val mono" id="r-agua-eur">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Consum nocturn</span>
+                <span class="kpi-row-val mono" id="r-agua-noc">—</span>
+                <span class="kpi-row-unit">m³</span>
+              </div>
+              <div class="kpi-row kpi-row--saving">
+                <span class="kpi-row-label">m³ estalviats</span>
+                <span class="kpi-row-val mono green" id="r-agua-save">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONSUMIBLES -->
+          <div class="kpi-card" id="kpi-cons">
+            <div class="kpi-header">
+              <span class="kpi-icon">📎</span>
+              <h3 class="kpi-name">Consumibles</h3>
+              <span class="kpi-badge" id="kpi-badge-cons"></span>
+            </div>
+            <div class="kpi-rows">
+              <div class="kpi-row">
+                <span class="kpi-row-label">Fulls impresos</span>
+                <span class="kpi-row-val mono" id="r-cons-hojas">—</span>
+                <span class="kpi-row-unit">u</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Cost paper</span>
+                <span class="kpi-row-val mono" id="r-cons-papel">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Cost rotuladors</span>
+                <span class="kpi-row-val mono" id="r-cons-rot">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row kpi-row--saving">
+                <span class="kpi-row-label">€ estalviats</span>
+                <span class="kpi-row-val mono green" id="r-cons-save">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NETEJA -->
+          <div class="kpi-card" id="kpi-limp">
+            <div class="kpi-header">
+              <span class="kpi-icon">🧹</span>
+              <h3 class="kpi-name">Neteja</h3>
+              <span class="kpi-badge" id="kpi-badge-limp"></span>
+            </div>
+            <div class="kpi-rows">
+              <div class="kpi-row">
+                <span class="kpi-row-label">Cost total</span>
+                <span class="kpi-row-val mono" id="r-limp-eur">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Paper higiènic</span>
+                <span class="kpi-row-val mono" id="r-limp-papel">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row">
+                <span class="kpi-row-label">Altres productes</span>
+                <span class="kpi-row-val mono" id="r-limp-otros">—</span>
+                <span class="kpi-row-unit">€</span>
+              </div>
+              <div class="kpi-row kpi-row--saving">
+                <span class="kpi-row-label">€ estalviats</span>
+                <span class="kpi-row-val mono green" id="r-limp-save">—</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- .kpi-grid -->
+
+        <!-- Banner de totals -->
+        <div class="totals-banner">
+          <div class="total-item">
+            <span class="total-label">Cost total amb estalvi</span>
+            <span class="total-val" id="tot-cost">— €</span>
+            <span class="total-sub" id="tot-cost-save"></span>
+          </div>
+          <div class="total-divider"></div>
+          <div class="total-item">
+            <span class="total-label">CO₂ evitat</span>
+            <span class="total-val" id="tot-co2">— t</span>
+            <span class="total-sub" id="tot-co2-save"></span>
+          </div>
+          <div class="total-divider"></div>
+          <div class="total-item">
+            <span class="total-label">Aigua estalviada</span>
+            <span class="total-val" id="tot-agua">— m³</span>
+            <span class="total-sub" id="tot-agua-save"></span>
+          </div>
+          <div class="total-divider"></div>
+          <div class="total-item">
+            <span class="total-label">Fulls estalviats</span>
+            <span class="total-val" id="tot-hojas">—</span>
+            <span class="total-sub" id="tot-hojas-save"></span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ░░░ GRÀFIC INTERACTIU ░░░ -->
+    <section class="section" id="grafic" aria-labelledby="tit-grafic">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-tag">Visualització</span>
+          <h2 class="section-title" id="tit-grafic">Evolució Mensual</h2>
+          <p class="section-desc">
+            Comparativa entre el consum base i el consum projectat amb les mesures actives.
+          </p>
+        </header>
+
+        <!-- Filtre del gràfic -->
+        <div class="chart-filters" role="group" aria-label="Filtre del gràfic">
+          <button class="cflt active" data-mode="all"   >Tots</button>
+          <button class="cflt"        data-mode="energy">💡 Energia</button>
+          <button class="cflt"        data-mode="water" >💧 Aigua</button>
+          <button class="cflt"        data-mode="costs" >💶 Costos</button>
+        </div>
+
+        <!-- Canvas del gràfic principal (Chart.js) -->
+        <div class="chart-panel">
+          <canvas id="mainChart" aria-label="Gràfic d'evolució mensual del consum" role="img"></canvas>
+        </div>
+
+        <!-- Llegenda interactiva -->
+        <div class="chart-legend" id="chartLegend"></div>
+
+      </div>
+    </section>
+
+    <!-- ░░░ PLA D'ACCIÓ 3 ANYS ░░░ -->
+    <section class="section section--accent" id="pla" aria-labelledby="tit-pla">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-tag section-tag--accent">Estratègia</span>
+          <h2 class="section-title" id="tit-pla">Projecció a 3 Anys</h2>
+          <p class="section-desc">
+            Cost projectat any a any aplicant una reducció gradual del 10% acumulat per any fins assolir el –30% al final de l'Any 3.
+          </p>
+        </header>
+
+        <!-- Taula de reducció any a any -->
+        <div class="yearplan-table-wrap">
+          <table class="yearplan-table">
+            <thead>
+              <tr>
+                <th>Indicador</th>
+                <th>Any 0 · Base</th>
+                <th>Any 1 <small>(–10%)</small></th>
+                <th>Any 2 <small>(–20%)</small></th>
+                <th>Any 3 <small>(–30%)</small></th>
+                <th>Estalvi 3 anys</th>
+              </tr>
+            </thead>
+            <tbody id="yearTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ░░░ PEU ░░░ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-brand">🌿 EcoCalc ITB</p>
+      <p class="footer-credits">Calculadora d'Estalvi Energètic · Institut Tecnològic de Barcelona</p>
+      <p class="footer-note">Dades calculades amb factors d'estacionalitat real i variabilitat ±5%</p>
+    </div>
+  </footer>
+
+  <!-- Script principal -->
+  <script src="script.js"></script>
+
+</body>
+</html>
