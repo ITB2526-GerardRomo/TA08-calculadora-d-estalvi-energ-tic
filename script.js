@@ -16,9 +16,11 @@ const MEASURES = {
   'sld-led':         { groups: ['energia'],           weight: 1.0 },
   'sld-sensors':     { groups: ['energia'],           weight: 1.0 },
   'sld-apagat':      { groups: ['energia'],           weight: 1.0 },
-  'sld-airejadors':  { groups: ['agua'],              weight: 1.0 },
+  'sld-aixetes':     { groups: ['agua'],              weight: 1.0 },
+  'sld-cisternes':   { groups: ['agua'],              weight: 1.0 },
   'sld-fugues':      { groups: ['agua'],              weight: 1.0 },
   'sld-impressio':   { groups: ['oficina'],           weight: 1.0 },
+  'sld-paper':       { groups: ['oficina'],           weight: 1.0 },
   'sld-eco':         { groups: ['neteja'],            weight: 1.0 }
 };
 
@@ -68,8 +70,13 @@ function calcReductions() {
 
 // Max potencial per grup (suma de tots els sliders del grup al màxim)
 function getGroupMax(group, activeChk) {
-  const maxes = { energia: { 'chk-led': 8, 'chk-sensors': 5, 'chk-apagat': 4 }, agua: { 'chk-airejadors': 6, 'chk-fugues': 5 }, oficina: { 'chk-impressio': 6 }, neteja: { 'chk-eco': 4 } };
-  const sums  = { energia: 17, agua: 11, oficina: 6, neteja: 4 };
+  const maxes = {
+    energia:  { 'chk-led': 8, 'chk-sensors': 5, 'chk-apagat': 4 },
+    agua:     { 'chk-aixetes': 5, 'chk-cisternes': 6, 'chk-fugues': 5 },
+    oficina:  { 'chk-impressio': 6, 'chk-paper': 5 },
+    neteja:   { 'chk-eco': 4 }
+  };
+  const sums  = { energia: 17, agua: 16, oficina: 11, neteja: 4 };
   return ((maxes[group]?.[activeChk] ?? 0) / sums[group]) * 100;
 }
 
