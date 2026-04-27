@@ -560,17 +560,180 @@ body {
 .footer-info { font-size: 12px; color: var(--text-dim); }
 
 /* ==================== RESPONSIVE ==================== */
+
+/* ── Tablet (≤1024px) ── */
 @media (max-width: 1024px) {
-  .calc-layout { grid-template-columns: 1fr; }
-  .controls-panel { position: static; }
+  .calc-layout {
+    grid-template-columns: 1fr;
+  }
+  .controls-panel {
+    position: static;
+  }
+  .section {
+    padding: 60px 24px;
+  }
 }
+
+/* ── Mobile L (≤768px) ── */
 @media (max-width: 768px) {
-  .header-nav { display: none; }
-  .hero-metrics { flex-direction: column; }
-  .hero-metric { border-right: none; border-bottom: 1px solid var(--border); }
-  .hero-metric:last-child { border-bottom: none; }
-  .year-actions { grid-template-columns: 1fr; }
-  .year-header { flex-wrap: wrap; }
+  /* Header */
+  .header-inner {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .header-nav {
+    display: none;
+  }
+  .brand-sub {
+    display: none;
+  }
+  .header-status {
+    margin-left: auto;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 90px 20px 60px;
+  }
+  .hero-metrics {
+    flex-direction: column;
+  }
+  .hero-metric {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+  .hero-metric:last-child {
+    border-bottom: none;
+  }
+  .hm-val {
+    font-size: 22px;
+  }
+
+  /* Sections */
+  .section {
+    padding: 48px 16px;
+  }
+  .section-title {
+    font-size: clamp(22px, 5vw, 32px);
+  }
+
+  /* Controls panel */
+  .controls-panel {
+    padding: 20px 16px;
+  }
+  .measure-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 0;
+  }
+  .measure-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .measure-controls {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 14px;
+  }
+  .slider {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* Charts panel */
+  .charts-panel {
+    padding: 16px 12px;
+  }
+  .chart-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chart-tab {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  .chart-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .chart-legend {
+    align-self: flex-start;
+  }
+  .donut-wrap {
+    height: 240px;
+  }
+
+  /* Roadmap */
+  .year-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 20px;
+  }
+  .year-actions {
+    grid-template-columns: 1fr;
+  }
+  .action-card {
+    border-right: none;
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 60px 20px;
+  }
+
+  /* Footer */
+  .footer-inner {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+/* ── Mobile S (≤480px) ── */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: clamp(32px, 9vw, 48px);
+    letter-spacing: -1px;
+  }
+  .hero-desc {
+    font-size: 14px;
+  }
+  .hero-tag {
+    font-size: 10px;
+    padding: 5px 12px;
+  }
+  .panel-title {
+    font-size: 16px;
+  }
+  .total-bar {
+    padding: 12px;
+  }
+  .total-pct {
+    font-size: 17px;
+  }
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-tab {
+    flex: 1;
+    text-align: center;
+  }
+  .donut-wrap {
+    height: 200px;
+  }
+  .cta-btn {
+    font-size: 13px;
+    padding: 14px 20px;
+    gap: 8px;
+  }
+  .year-target {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
 }
 
 /* ==================== FLASH ANIMATION (implementar) ==================== */
