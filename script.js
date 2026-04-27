@@ -11,18 +11,25 @@ const DATA = {
   neteja:      { anual: 2160,  escolar: 1800,  unit: '€',    cost: 1,     co2: 0.008, label: 'Neteja', icon: '🧹', color: '#f5a442' }
 };
 
-// Mesures i els seus pesos per indicador (suma lliure, s'aplica cap reductor global)
+// Mesures amb la seva contribució màxima al % global de reducció.
+// Cada valor maxGlobalPct correspon directament al pla d'acció de 3 anys.
+// Suma total de tots els maxGlobalPct = 30% (objectiu del pla).
 const MEASURES = {
-  'sld-led':         { groups: ['energia'],           weight: 1.0 },
-  'sld-sensors':     { groups: ['energia'],           weight: 1.0 },
-  'sld-apagat':      { groups: ['energia'],           weight: 1.0 },
-  'sld-aixetes':     { groups: ['agua'],              weight: 1.0 },
-  'sld-cisternes':   { groups: ['agua'],              weight: 1.0 },
-  'sld-fugues':      { groups: ['agua'],              weight: 1.0 },
-  'sld-impressio':   { groups: ['oficina'],           weight: 1.0 },
-  'sld-paper':       { groups: ['oficina'],           weight: 1.0 },
-  'sld-eco':         { groups: ['neteja'],            weight: 1.0 }
+  //  Slider ID          Grup        Pla d'acció                  Max global
+  'sld-led':       { group: 'energia', maxGlobalPct: 5 },  // LED (−3%) + auditoria (−2%)
+  'sld-sensors':   { group: 'energia', maxGlobalPct: 5 },  // Sensors presència (−4%) + fotovoltaic parcial
+  'sld-apagat':    { group: 'energia', maxGlobalPct: 4 },  // Apagat nit + reparació equips (−1%) + IT
+  'sld-aixetes':   { group: 'agua',    maxGlobalPct: 2 },  // Estalvi aigua directe
+  'sld-cisternes': { group: 'agua',    maxGlobalPct: 2 },  // Estalvi descàrrega
+  'sld-fugues':    { group: 'agua',    maxGlobalPct: 3 },  // Detecció fugues (−3%)
+  'sld-impressio': { group: 'oficina', maxGlobalPct: 3 },  // Impressió responsable (−2%) + compra verda
+  'sld-paper':     { group: 'oficina', maxGlobalPct: 3 },  // Paper reciclat + compra verda (−3%)
+  'sld-eco':       { group: 'neteja',  maxGlobalPct: 3 },  // Productes ecològics (−2%) + reutilització IT
 };
+// ∑ maxGlobalPct = 5+5+4+2+2+3+3+3+3 = 30% ✓
+
+// Pes de cada grup en el cost total (per calcular la reducció per categoria)
+const GROUP_WEIGHTS = { energia: 0.50, agua: 0.20, oficina: 0.16, neteja: 0.14 };
 
 // ── ESTAT ─────────────────────────────────────────────────────────────────────
 const state = {
@@ -37,48 +44,39 @@ function fmt(val, decimals = 0) {
 }
 
 /**
- * Calcula la reducció per grup, aplicant un cap realista.
- * La suma bruta mai supera el 30% global (invisible per l'usuari).
+ * Calcula la reducció global i per grup.
+ * Cada mesura aporta directament el seu maxGlobalPct (proporcional al slider).
+ * La suma de tots els maxGlobalPct al 100% = 30% (objectiu del pla).
  */
 function calcReductions() {
-  const raw = { energia: 0, agua: 0, oficina: 0, neteja: 0 };
+  const byGroup = { energia: 0, agua: 0, oficina: 0, neteja: 0 };
 
   Object.entries(MEASURES).forEach(([sliderId, cfg]) => {
     const chkId = sliderId.replace('sld-', 'chk-');
-    const isOn = state.toggles[chkId] ?? false;
-    if (!isOn) return;
-    const val = state.sliders[sliderId] ?? 0;
-    const max = parseInt(document.getElementById(sliderId)?.max || 8);
-    const pct = (val / max); // 0–1
-    cfg.groups.forEach(g => { raw[g] += pct * getGroupMax(g, chkId); });
+    if (!(state.toggles[chkId] ?? false)) return;
+    const sld = document.getElementById(sliderId);
+    if (!sld) return;
+    const ratio = parseFloat(sld.value) / parseFloat(sld.max); // 0–1
+    byGroup[cfg.group] += ratio * cfg.maxGlobalPct;
   });
 
-  // Calcula la reducció bruta global ponderada
-  const weights = { energia: 0.50, agua: 0.20, oficina: 0.16, neteja: 0.14 };
-  let grossGlobal = Object.entries(weights).reduce((s, [g, w]) => s + raw[g] * w, 0);
+  // Total global (mai supera el 30% físicament possible)
+  const totalGlobal = Math.min(
+    Object.values(byGroup).reduce((s, v) => s + v, 0),
+    30
+  );
 
-  // Factor corrector: si grossGlobal > 30%, escalar tot proporcional (invisible)
-  const MAX_GLOBAL = 30;
-  const corrector = grossGlobal > MAX_GLOBAL ? MAX_GLOBAL / grossGlobal : 1;
-
+  // Reducció per categoria: contribució global del grup / pes del grup en el cost total
   const result = {};
-  Object.keys(raw).forEach(g => { result[g] = Math.min(raw[g] * corrector, 35); });
-  result.total = grossGlobal > MAX_GLOBAL ? MAX_GLOBAL : grossGlobal;
+  Object.keys(byGroup).forEach(g => {
+    result[g] = Math.min(byGroup[g] / GROUP_WEIGHTS[g], 100);
+  });
+  result.total = totalGlobal;
 
   return result;
 }
 
-// Max potencial per grup (suma de tots els sliders del grup al màxim)
-function getGroupMax(group, activeChk) {
-  const maxes = {
-    energia:  { 'chk-led': 8, 'chk-sensors': 5, 'chk-apagat': 4 },
-    agua:     { 'chk-aixetes': 5, 'chk-cisternes': 6, 'chk-fugues': 5 },
-    oficina:  { 'chk-impressio': 6, 'chk-paper': 5 },
-    neteja:   { 'chk-eco': 4 }
-  };
-  const sums  = { energia: 17, agua: 16, oficina: 11, neteja: 4 };
-  return ((maxes[group]?.[activeChk] ?? 0) / sums[group]) * 100;
-}
+// getGroupMax ja no cal — la lògica és directa via maxGlobalPct
 
 // ── CHARTS ────────────────────────────────────────────────────────────────────
 let chartAnual, chartEscolar, chartDonut;
@@ -327,10 +325,16 @@ function initControls() {
     const lblId = sld.dataset.label;
     const updateLabel = () => {
       const max = parseFloat(sld.max);
-      const pct = ((parseFloat(sld.value) / max) * 100).toFixed(0);
       const chkId = sld.id.replace('sld-', 'chk-');
       const isOn = state.toggles[chkId] ?? false;
-      if (lblId) document.getElementById(lblId).textContent = isOn ? `+${pct}%` : '+0%';
+      if (lblId) {
+        if (isOn && MEASURES[sld.id]) {
+          const contribution = ((parseFloat(sld.value) / max) * MEASURES[sld.id].maxGlobalPct).toFixed(1);
+          document.getElementById(lblId).textContent = `−${contribution}%`;
+        } else {
+          document.getElementById(lblId).textContent = '−0%';
+        }
+      }
     };
     sld.addEventListener('input', () => {
       state.sliders[sld.id] = parseFloat(sld.value);
@@ -370,9 +374,11 @@ document.getElementById('implementBtn').addEventListener('click', () => {
     document.querySelectorAll('.slider').forEach(sld => {
       sld.value = sld.max;
       state.sliders[sld.id] = parseFloat(sld.max);
-      // Update label
+      // Mostra la contribució real al % global
       const lblId = sld.dataset.label;
-      if (lblId) document.getElementById(lblId).textContent = `+100%`;
+      if (lblId && MEASURES[sld.id]) {
+        document.getElementById(lblId).textContent = `−${MEASURES[sld.id].maxGlobalPct.toFixed(1)}%`;
+      }
     });
     // Animate the panel
     document.querySelector('.controls-panel').classList.add('implementing');
